@@ -6,7 +6,13 @@ namespace JavaCompiler
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            FileHandler.ReadLines($@"{Environment.CurrentDirectory}\\..\\..\\..\\" + args[0]);
+            Scanner scanner = new Scanner();
+
+            while (Resources.Token != Resources.Symbol.EofT)
+            {
+                scanner.GetNextToken();
+            }
         }
     }
 }
