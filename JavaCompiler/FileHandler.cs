@@ -6,16 +6,30 @@ using System.Linq;
 
 namespace JavaCompiler
 {
-    public static class FileHandler
+    public class FileHandler
     {
-        public static List<string> Lines { get; set; } = new List<string>();
-        public static string CurrentLine { get; set; }
-        public static int CharNum { get; set; }
+        public List<string> lines { get; set; }
+        public string currentLine { get; private set; }
+        public int lineNum { get; set; }
+        public int charIndex { get; set; }
 
-        public static void ReadLines(string filePath)
+        public FileHandler()
         {
-            Lines = File.ReadAllLines(filePath).ToList();
-            CurrentLine = Lines[0];
+            lines = new List<string>();
+            currentLine = "";
+            lineNum = 1;
+            charIndex = 0;
+        }
+
+        public void ReadLines(string filePath)
+        {
+            lines = File.ReadAllLines(filePath).ToList();
+            SetCurrentLine(lineNum);
+        }
+
+        public void SetCurrentLine(int lineNum)
+        {
+            currentLine = lines[lineNum - 1];
         }
     }
 }

@@ -6,8 +6,10 @@ namespace JavaCompiler
     {
         static void Main(string[] args)
         {
-            FileHandler.ReadLines($@"{Environment.CurrentDirectory}\\..\\..\\..\\" + args[0]);
-            Scanner scanner = new Scanner();
+            FileHandler javaFile = new FileHandler();
+            javaFile.ReadLines($@"{Environment.CurrentDirectory}\\..\\..\\..\\" + args[0]);
+
+            Scanner scanner = new Scanner(javaFile);
 
             while (Resources.Token != Resources.Symbol.EofT)
             {

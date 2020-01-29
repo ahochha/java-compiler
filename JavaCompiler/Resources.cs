@@ -21,13 +21,13 @@ namespace JavaCompiler
             WhileT, PrintT, LengthT, TrueT, FalseT, ThisT, 
             NewT, LParenT, RParenT, LBrackT, RBrackT, LBraceT,
             RBraceT, CommaT, SemiT, AsterT, PeriodT, IdT,
-            AddOpT, MulOpT, AssignOpT, EofT, UnknownT
+            QuoteT, AddOpT, MulOpT, AssignOpT, EofT, UnknownT
         }
 
         public static Symbol Token { get; set; }
         public static string Lexeme { get; set; }
+        public static string Literal { get; set; }
         public static char CurrentChar { get; set; }
-        public static int LineNum { get; set; }
         public static int Value { get; set; }
         public static double ValueR { get; set; }
     }

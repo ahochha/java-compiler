@@ -8,38 +8,49 @@ namespace JavaCompiler
 {
     public class Scanner : Resources
     {
-        public Scanner()
+        public List<Token> tokens { get; set; }
+        public FileHandler javaFile { get; set; }
+
+        public Scanner(FileHandler file)
         {
+            javaFile = file;
+            tokens = new List<Token>();
+
+            //Resources
             Token = Symbol.UnknownT;
             Lexeme = "";
-            LineNum = 1;
-            GetNextChar();
+            Literal = "";
+            CurrentChar = ' ';
+            Value = 0;
+            ValueR = 0.0;
         }
 
         public void GetNextChar()
         {
-            CurrentChar = FileHandler.CurrentLine[FileHandler.CharNum];
-            FileHandler.CharNum++;
+            CurrentChar = javaFile.currentLine[javaFile.charIndex];
+            javaFile.charIndex++;
         }
 
         public void GetNextToken()
         {
-            while (CurrentChar == ' ')
+            if (javaFile.lineNum <= javaFile.lines.Count())
             {
-                GetNextChar();
-            }
-
-            if (LineNum <= FileHandler.Lines.Count())
-            {
-                if (!FileHandler.Lines[LineNum].EndsWith(CurrentChar))
+                if (!javaFile.lines[javaFile.lineNum].EndsWith(CurrentChar))
                 {
+                    GetNextChar();
+
+                    while (CurrentChar == ' ')
+                    {
+                        GetNextChar();
+                    }
+
                     ProcessToken();
                 }
                 else
                 {
-                    LineNum++;
-                    FileHandler.CharNum = 0;
-                    FileHandler.CurrentLine = FileHandler.Lines[LineNum];
+                    javaFile.lineNum++;
+                    javaFile.charIndex = 0;
+                    javaFile.SetCurrentLine(javaFile.lineNum);
                 }
             }
             else
@@ -50,38 +61,71 @@ namespace JavaCompiler
 
         public void ProcessToken()
         {
-            Regex Letter = new Regex(@"[a-zA-Z]");
-            Regex Number = new Regex(@"[0-9]");
-            Regex Comparison = new Regex(@"<|>|=");
-            Regex Comment = new Regex(@"/");
+            Regex letter = new Regex(@"[a-zA-Z]");
+            Regex number = new Regex(@"[0-9]");
+            Regex literal = new Regex("(\")");
+            Regex comparison = new Regex(@"<|>|!|=");
+            Regex comment = new Regex(@"/");
             Lexeme = CurrentChar.ToString();
             GetNextChar();
 
-            if (Letter.IsMatch(Lexeme))
+            if (letter.IsMatch(Lexeme))
             {
                 ProcessWordToken();
             }
-            else if (Number.IsMatch(Lexeme))
+            else if (number.IsMatch(Lexeme))
             {
                 ProcessNumToken();
             }
-            else if (Comment.IsMatch(Lexeme))
+            else if (literal.IsMatch(Lexeme))
             {
-                //...
+                ProcessLiteral();
+            }
+            else if (comment.IsMatch(Lexeme))
+            {
+                ProcessCommentToken();
             }
         }
 
         public void ProcessWordToken()
         {
+            Regex word = new Regex(@"\w+");
+            Symbol token = Symbol.UnknownT;
 
+            while (word.IsMatch(CurrentChar.ToString()))
+            {
+                Lexeme += CurrentChar;
+                GetNextChar();
+            }
+
+            if (word.IsMatch(Lexeme))
+            {
+                token = (KeyWords.Contains(Lexeme)) ? (Symbol)KeyWords.FindIndex(t => KeyWords.Contains(Lexeme)) : Symbol.IdT;
+                tokens.Add(new Token(token, Lexeme));
+            }
+            else
+            {
+                //log error for invalid word token
+            }
         }
 
         public void ProcessNumToken()
         {
+            Regex number = new Regex(@"[0-9]");
+
+            while (number.IsMatch(CurrentChar.ToString()))
+            {
+                Lexeme += CurrentChar;
+                GetNextChar();
+            }
+        }
+
+        public void ProcessLiteral()
+        {
 
         }
 
-        public void ProcessComment()
+        public void ProcessCommentToken()
         {
 
         }
