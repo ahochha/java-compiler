@@ -15,6 +15,13 @@ namespace JavaCompiler
             {
                 scanner.GetNextToken();
             }
+
+            scanner.tokens.Add(new Token(Resources.Token, "Done!"));
+
+            foreach(Token token in scanner.tokens)
+            {
+                Console.WriteLine($"Token: {token.token}  Attribute: {token.attribute}");
+            }
         }
     }
 }

@@ -18,17 +18,15 @@ namespace JavaCompiler
         {
             ClassT, PublicT, StaticT, VoidT, MainT, StringT,
             ExtendsT, ReturnT, IntT, BooleanT, IfT, ElseT,
-            WhileT, PrintT, LengthT, TrueT, FalseT, ThisT, 
-            NewT, LParenT, RParenT, LBrackT, RBrackT, LBraceT,
-            RBraceT, CommaT, SemiT, AsterT, PeriodT, IdT,
-            QuoteT, AddOpT, MulOpT, AssignOpT, EofT, UnknownT
+            WhileT, PrintT, LengthT, TrueT, FalseT, ThisT, NewT, 
+            LParenT, RParenT, LBrackT, RBrackT, LBraceT, RBraceT, 
+            CommaT, SemiT, PeriodT, IdT, NumT, LiteralT, QuoteT, 
+            AssignOpT, AddOpT, MulOpT, RelOpT, EofT, UnknownT
         }
 
         public static Symbol Token { get; set; }
         public static string Lexeme { get; set; }
         public static string Literal { get; set; }
         public static char CurrentChar { get; set; }
-        public static int Value { get; set; }
-        public static double ValueR { get; set; }
     }
 }

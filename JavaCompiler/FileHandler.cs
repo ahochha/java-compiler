@@ -24,12 +24,27 @@ namespace JavaCompiler
         public void ReadLines(string filePath)
         {
             lines = File.ReadAllLines(filePath).ToList();
-            SetCurrentLine(lineNum);
+            SetCurrentLine();
         }
 
-        public void SetCurrentLine(int lineNum)
+        public void GoToNextLine()
         {
-            currentLine = lines[lineNum - 1];
+            lineNum++;
+            charIndex = 0;
+            SetCurrentLine();
+        }
+
+        public void SetCurrentLine()
+        {
+            if (!IsEndOfFile())
+            {
+                currentLine = lines[lineNum - 1];
+            }
+        }
+
+        public bool IsEndOfFile()
+        {
+            return lineNum > lines.Count();
         }
     }
 }
