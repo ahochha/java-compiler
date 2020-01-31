@@ -15,7 +15,7 @@ namespace JavaCompiler
         {
             javaFile = file;
             tokens = new List<Token>();
-            GetNextChar();
+            javaFile.GetNextChar();
 
             //Resources
             Token = Symbol.UnknownT;
@@ -23,40 +23,20 @@ namespace JavaCompiler
             Literal = "";
         }
 
-        public void GetNextChar()
-        {
-            if (javaFile.charIndex < javaFile.currentLine.Length)
-            {
-                CurrentChar = javaFile.currentLine[javaFile.charIndex];
-                javaFile.charIndex++;
-            }
-            else
-            {
-                javaFile.GoToNextLine();
-
-                while (javaFile.currentLine.Length == 0)
-                {
-                    javaFile.GoToNextLine();
-                }
-
-                CurrentChar = javaFile.currentLine[javaFile.charIndex];
-                javaFile.charIndex++;
-            }
-        }
-
         public void GetNextToken()
         {
-            if (!javaFile.IsEndOfFile())
+            if (!javaFile.program.EndOfStream)
             {
                 while (CurrentChar == ' ')
                 {
-                    GetNextChar();
+                    javaFile.GetNextChar();
                 }
 
                 ProcessToken();
             }
             else
             {
+                ProcessToken();
                 Token = Symbol.EofT;
             }
         }
@@ -65,13 +45,14 @@ namespace JavaCompiler
         {
             Regex letter = new Regex(@"[a-zA-Z]");
             Regex digit = new Regex(@"\d");
-            Regex comparison = new Regex(@"<|>|!|=");
-            Regex special = new Regex(@"\(|\)|\[|\]|\{|\}|,|;|\.|\+|-|\*|/");
-            Regex literal = new Regex("\"");
-            Regex comment = new Regex(@"/");
+            Regex comparison = new Regex(@"<|>|!|=|&|\|");
+            Regex lookAheadChar = new Regex(@"=|&|\|");
+            Regex specialChar = new Regex(@"\(|\)|\[|\]|\{|\}|,|;|\.|\+|-|\*|/|=|<|>");
+            string literal = "\"";
 
+            ProcessComment();
             Lexeme = CurrentChar.ToString();
-            GetNextChar();
+            javaFile.GetNextChar();
 
             if (letter.IsMatch(Lexeme))
             {
@@ -81,25 +62,21 @@ namespace JavaCompiler
             {
                 ProcessNumToken();
             }
-            else if (comparison.IsMatch(Lexeme))
+            else if (comparison.IsMatch(Lexeme) && lookAheadChar.IsMatch(javaFile.PeekNextChar().ToString()))
             {
-                ProcessComparisonToken();
+                ProcessDoubleToken();
             }
-            else if (special.IsMatch(Lexeme))
+            else if (specialChar.IsMatch(Lexeme))
             {
                 ProcessSingleToken();
             }
-            else if (literal.IsMatch(Lexeme))
+            else if (Lexeme == literal)
             {
                 ProcessLiteral();
             }
-            else if (comment.IsMatch(Lexeme))
+            else if (Lexeme != "\n" && Lexeme != "\r" && Lexeme != " ")
             {
-                ProcessComment();
-            }
-            else
-            {
-                //log error for invalid token
+                tokens.Add(new Token(Symbol.UnknownT, Lexeme));
             }
         }
 
@@ -113,17 +90,18 @@ namespace JavaCompiler
             if (Lexeme == "System")
             {
                 LoadLexeme(print);
-                tokens.Add(new Token(Symbol.PrintT, Lexeme));
+                Token = Symbol.PrintT;
             }
             else if (word.IsMatch(Lexeme) && Lexeme.Length <= 31)
             {
                 Token = (KeyWords.Contains(Lexeme)) ? (Symbol)KeyWords.FindIndex(t => t == Lexeme) : Symbol.IdT;
-                tokens.Add(new Token(Token, Lexeme));
             }
             else
             {
-                //log error for invalid word token
+                Token = Symbol.UnknownT;
             }
+
+            tokens.Add(new Token(Token, Lexeme));
         }
 
         public void ProcessNumToken()
@@ -132,27 +110,8 @@ namespace JavaCompiler
             Regex number = new Regex(@"(\d*\.)?\d+");
 
             LoadLexeme(digit);
-
-            if (number.IsMatch(Lexeme))
-            {
-                tokens.Add(new Token(Symbol.NumT, Lexeme));
-            }
-            else
-            {
-                //log error for invalid number
-            }
-        }
-
-        public void ProcessComparisonToken()
-        {
-            if (CurrentChar != ' ')
-            {
-                ProcessDoubleToken();
-            }
-            else
-            {
-                ProcessSingleToken();
-            }
+            Token = (number.IsMatch(Lexeme)) ? Symbol.NumT : Symbol.UnknownT;
+            tokens.Add(new Token(Token, Lexeme));
         }
 
         public void ProcessDoubleToken()
@@ -173,7 +132,7 @@ namespace JavaCompiler
             }
             else
             {
-                //log error for invalid double token
+                Token = Symbol.UnknownT;
             }
 
             tokens.Add(new Token(Token, Lexeme));
@@ -235,7 +194,7 @@ namespace JavaCompiler
             }
             else
             {
-                //log error for invalid special character token
+                Token = Symbol.UnknownT;
             }
 
             tokens.Add(new Token(Token, Lexeme));
@@ -244,55 +203,51 @@ namespace JavaCompiler
         public void ProcessLiteral()
         {
             tokens.Add(new Token(Symbol.QuoteT, Lexeme));
+            Token = Symbol.LiteralT;
 
-            while (CurrentChar != '\"')
+            while (CurrentChar != '\"' && !javaFile.program.EndOfStream)
             {
                 Literal += CurrentChar;
-                GetNextChar();
+                javaFile.GetNextChar();
 
-                if (javaFile.currentLine.Length >= javaFile.charIndex)
+                if (javaFile.PeekNextChar() == '\n')
                 {
+                    Token = Symbol.UnknownT;
                     break;
                 }
             }
 
-            tokens.Add(new Token(Symbol.LiteralT, Literal));
-            
-            if(CurrentChar == '\"')
+            tokens.Add(new Token(Token, Literal));
+
+            if (CurrentChar == '\"')
             {
                 Lexeme = CurrentChar.ToString();
                 tokens.Add(new Token(Symbol.QuoteT, Lexeme));
             }
-            else
-            {
-                //log error for missing quotes
-            }
-            
         }
 
         public void ProcessComment()
         {
             Regex multiLineCommentEnd = new Regex(@"\*/");
 
-            if (CurrentChar == '/')
+            if (javaFile.PeekNextChar() == '/')
             {
-                javaFile.lineNum++;
-                javaFile.charIndex = 0;
-                javaFile.SetCurrentLine();
+                javaFile.GetNextChar();
+
+                while (javaFile.PeekNextChar() != '\n')
+                {
+                    javaFile.GetNextChar();
+                }
             }
-            else if (CurrentChar == '*')
+            else if (javaFile.PeekNextChar() == '*')
             {
-                GetNextChar();
+                javaFile.GetNextChar();
 
                 while (multiLineCommentEnd.Match(Lexeme).Length == 0)
                 {
                     Lexeme += CurrentChar;
-                    GetNextChar();
+                    javaFile.GetNextChar();
                 }
-            }
-            else
-            {
-                //log error for random /
             }
         }
 
@@ -301,7 +256,15 @@ namespace JavaCompiler
             while (regex.IsMatch(CurrentChar.ToString()))
             {
                 Lexeme += CurrentChar;
-                GetNextChar();
+                javaFile.GetNextChar();
+            }
+        }
+
+        public void Print()
+        {
+            foreach(Token token in tokens)
+            {
+                Console.WriteLine(string.Format("Token: {0, -10}Attribute: {1, -10}", token.token, token.attribute));
             }
         }
     }

@@ -8,43 +8,33 @@ namespace JavaCompiler
 {
     public class FileHandler
     {
-        public List<string> lines { get; set; }
-        public string currentLine { get; private set; }
+        public StreamReader program {get; set; }
         public int lineNum { get; set; }
-        public int charIndex { get; set; }
 
         public FileHandler()
         {
-            lines = new List<string>();
-            currentLine = "";
             lineNum = 1;
-            charIndex = 0;
         }
 
         public void ReadLines(string filePath)
         {
-            lines = File.ReadAllLines(filePath).ToList();
-            SetCurrentLine();
+            program = File.OpenText(filePath);
         }
 
-        public void GoToNextLine()
+        public void GetNextChar()
         {
-            lineNum++;
-            charIndex = 0;
-            SetCurrentLine();
-        }
-
-        public void SetCurrentLine()
-        {
-            if (!IsEndOfFile())
+            Resources.CurrentChar = (char)program.Read();
+            
+            if (Resources.CurrentChar == '\n')
             {
-                currentLine = lines[lineNum - 1];
+                lineNum++;
+                Resources.CurrentChar = (char)program.Read();
             }
         }
 
-        public bool IsEndOfFile()
+        public char PeekNextChar()
         {
-            return lineNum > lines.Count();
+            return (char)program.Peek();
         }
     }
 }
