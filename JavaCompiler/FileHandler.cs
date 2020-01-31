@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace JavaCompiler
 {
-    public class FileHandler
+    public class FileHandler : Resources
     {
         public StreamReader program {get; set; }
         public int lineNum { get; set; }
@@ -23,18 +23,25 @@ namespace JavaCompiler
 
         public void GetNextChar()
         {
-            Resources.CurrentChar = (char)program.Read();
+            CurrentChar = (char)program.Read();
             
-            if (Resources.CurrentChar == '\n')
+            if (CurrentChar == '\n')
             {
                 lineNum++;
-                Resources.CurrentChar = (char)program.Read();
             }
         }
 
         public char PeekNextChar()
         {
             return (char)program.Peek();
+        }
+
+        public void SkipWhitespace()
+        {
+            while (char.IsWhiteSpace(CurrentChar))
+            {
+                GetNextChar();
+            }
         }
     }
 }

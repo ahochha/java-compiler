@@ -27,16 +27,11 @@ namespace JavaCompiler
         {
             if (!javaFile.program.EndOfStream)
             {
-                while (CurrentChar == ' ')
-                {
-                    javaFile.GetNextChar();
-                }
-
+                javaFile.SkipWhitespace();
                 ProcessToken();
             }
             else
             {
-                ProcessToken();
                 Token = Symbol.EofT;
             }
         }
@@ -74,7 +69,7 @@ namespace JavaCompiler
             {
                 ProcessLiteral();
             }
-            else if (Lexeme != "\n" && Lexeme != "\r" && Lexeme != " ")
+            else
             {
                 tokens.Add(new Token(Symbol.UnknownT, Lexeme));
             }
@@ -106,8 +101,8 @@ namespace JavaCompiler
 
         public void ProcessNumToken()
         {
-            Regex digit = new Regex(@"\d|\.");
-            Regex number = new Regex(@"(\d*\.)?\d+");
+            Regex digit = new Regex(@"\w|\.");
+            Regex number = new Regex(@"^(\d*\.)?\d+$");
 
             LoadLexeme(digit);
             Token = (number.IsMatch(Lexeme)) ? Symbol.NumT : Symbol.UnknownT;
@@ -222,45 +217,47 @@ namespace JavaCompiler
             if (CurrentChar == '\"')
             {
                 Lexeme = CurrentChar.ToString();
+                javaFile.GetNextChar();
                 tokens.Add(new Token(Symbol.QuoteT, Lexeme));
             }
         }
 
         public void ProcessComment()
         {
-            Regex multiLineCommentEnd = new Regex(@"\*/");
-
             if (javaFile.PeekNextChar() == '/')
             {
-                javaFile.GetNextChar();
-
-                while (javaFile.PeekNextChar() != '\n')
-                {
-                    javaFile.GetNextChar();
-                }
+                SkipComment(oneLineCommentEndRegex);
             }
             else if (javaFile.PeekNextChar() == '*')
             {
+                SkipComment(multiLineCommentEndRegex);
                 javaFile.GetNextChar();
-
-                while (multiLineCommentEnd.Match(Lexeme).Length == 0)
-                {
-                    Lexeme += CurrentChar;
-                    javaFile.GetNextChar();
-                }
+                javaFile.SkipWhitespace();
             }
         }
 
-        public void LoadLexeme(Regex regex)
+        public void SkipComment(Regex commentEndRegex)
         {
-            while (regex.IsMatch(CurrentChar.ToString()))
+            javaFile.GetNextChar();
+
+            while (!commentEndRegex.IsMatch(CurrentChar.ToString() + javaFile.PeekNextChar()))
+            {
+                javaFile.GetNextChar();
+            }
+
+            javaFile.GetNextChar();
+        }
+
+        public void LoadLexeme(Regex lexemeRegex)
+        {
+            while (lexemeRegex.IsMatch(CurrentChar.ToString()))
             {
                 Lexeme += CurrentChar;
                 javaFile.GetNextChar();
             }
         }
 
-        public void Print()
+    public void Print()
         {
             foreach(Token token in tokens)
             {

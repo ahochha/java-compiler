@@ -7,7 +7,7 @@ namespace JavaCompiler
         static void Main(string[] args)
         {
             FileHandler javaFile = new FileHandler();
-            javaFile.ReadLines($@"{Environment.CurrentDirectory}\\..\\..\\..\\" + args[0]);
+            javaFile.ReadLines($@"{Environment.CurrentDirectory}\\" + args[0]);
 
             Scanner scanner = new Scanner(javaFile);
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace JavaCompiler
 {
@@ -23,6 +24,9 @@ namespace JavaCompiler
             CommaT, SemiT, PeriodT, IdT, NumT, LiteralT, QuoteT, 
             AssignOpT, AddOpT, MulOpT, RelOpT, EofT, UnknownT
         }
+
+        public static Regex oneLineCommentEndRegex = new Regex(@"\n[^\r|\n]");
+        public static Regex multiLineCommentEndRegex = new Regex(@"\*/");
 
         public static Symbol Token { get; set; }
         public static string Lexeme { get; set; }
