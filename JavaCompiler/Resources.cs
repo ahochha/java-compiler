@@ -7,6 +7,7 @@ namespace JavaCompiler
 {
     public class Resources
     {
+        // Java reserved words
         public static List<string> KeyWords = new List<string>()
         {
             "class", "public", "static", "void", "main", "String",
@@ -15,6 +16,7 @@ namespace JavaCompiler
             "this", "new"
         };
 
+        // Types of tokens
         public enum Symbol
         {
             ClassT, PublicT, StaticT, VoidT, MainT, StringT,
@@ -25,6 +27,14 @@ namespace JavaCompiler
             AssignOpT, AddOpT, MulOpT, RelOpT, EofT, UnknownT
         }
 
+        // Regular expressions used in Scanner
+        public static Regex comparisonRegex = new Regex(@"<|>|!|=|&|\|");
+        public static Regex lookAheadCharRegex = new Regex(@"=|&|\|");
+        public static Regex specialCharRegex = new Regex(@"\(|\)|\[|\]|\{|\}|,|;|\.|\+|-|\*|/|=|<|>");
+        public static Regex word = new Regex(@"\w+");
+        public static Regex print = new Regex(@"\.|[a-z]");
+        public static Regex decimalDigitRegex = new Regex(@"\w|\.");
+        public static Regex numberRegex = new Regex(@"^(\d*\.)?\d+$");
         public static Regex oneLineCommentEndRegex = new Regex(@"\n[^\r|\n]");
         public static Regex multiLineCommentEndRegex = new Regex(@"\*/");
 
@@ -32,5 +42,7 @@ namespace JavaCompiler
         public static string Lexeme { get; set; }
         public static string Literal { get; set; }
         public static char CurrentChar { get; set; }
+        public static int Value { get; set; }
+        public static double ValueR { get; set; }
     }
 }

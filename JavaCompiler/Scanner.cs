@@ -17,12 +17,15 @@ namespace JavaCompiler
             tokens = new List<Token>();
             javaFile.GetNextChar();
 
-            //Resources
+            // Resources
             Token = Symbol.UnknownT;
             Lexeme = "";
             Literal = "";
         }
 
+        /// <summary>
+        /// Processes tokens until end of stream has been hit.
+        /// </summary>
         public void GetNextToken()
         {
             if (!javaFile.program.EndOfStream)
@@ -36,36 +39,33 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// Reads the first token char into Lexeme, which is then
+        /// used to determine which function to use for processing.
+        /// </summary>
         public void ProcessToken()
         {
-            Regex letter = new Regex(@"[a-zA-Z]");
-            Regex digit = new Regex(@"\d");
-            Regex comparison = new Regex(@"<|>|!|=|&|\|");
-            Regex lookAheadChar = new Regex(@"=|&|\|");
-            Regex specialChar = new Regex(@"\(|\)|\[|\]|\{|\}|,|;|\.|\+|-|\*|/|=|<|>");
-            string literal = "\"";
-
             ProcessComment();
             Lexeme = CurrentChar.ToString();
             javaFile.GetNextChar();
 
-            if (letter.IsMatch(Lexeme))
+            if (char.IsLetter(Lexeme[0]))
             {
                 ProcessWordToken();
             }
-            else if (digit.IsMatch(Lexeme))
+            else if (char.IsDigit(Lexeme[0]))
             {
                 ProcessNumToken();
             }
-            else if (comparison.IsMatch(Lexeme) && lookAheadChar.IsMatch(javaFile.PeekNextChar().ToString()))
+            else if (comparisonRegex.IsMatch(Lexeme) && lookAheadCharRegex.IsMatch(javaFile.PeekNextChar().ToString()))
             {
                 ProcessDoubleToken();
             }
-            else if (specialChar.IsMatch(Lexeme))
+            else if (specialCharRegex.IsMatch(Lexeme))
             {
                 ProcessSingleToken();
             }
-            else if (Lexeme == literal)
+            else if (Lexeme == "\"")
             {
                 ProcessLiteral();
             }
@@ -75,11 +75,13 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// Reads characters into Lexeme, then validates for correct 
+        /// word token. Word token can be a reserved word (KeyWords list) 
+        /// or an identifier (IdT). Adds token to list.
+        /// </summary>
         public void ProcessWordToken()
         {
-            Regex word = new Regex(@"\w+");
-            Regex print = new Regex(@"\.|[a-z]");
-
             LoadLexeme(word);
 
             if (Lexeme == "System")
@@ -99,16 +101,22 @@ namespace JavaCompiler
             tokens.Add(new Token(Token, Lexeme));
         }
 
+        /// <summary>
+        /// Reads characters into Lexeme, then validates for correct 
+        /// number token. Number token (NumT) can be an integer or double 
+        /// value. Adds token to list.
+        /// </summary>
         public void ProcessNumToken()
         {
-            Regex digit = new Regex(@"\w|\.");
-            Regex number = new Regex(@"^(\d*\.)?\d+$");
-
-            LoadLexeme(digit);
-            Token = (number.IsMatch(Lexeme)) ? Symbol.NumT : Symbol.UnknownT;
+            LoadLexeme(decimalDigitRegex);
+            Token = (numberRegex.IsMatch(Lexeme)) ? Symbol.NumT : Symbol.UnknownT;
             tokens.Add(new Token(Token, Lexeme));
         }
 
+        /// <summary>
+        /// Reads next character into Lexeme, then validates correct 
+        /// double token. Adds token to list.
+        /// </summary>
         public void ProcessDoubleToken()
         {
             Lexeme += CurrentChar;
@@ -133,6 +141,9 @@ namespace JavaCompiler
             tokens.Add(new Token(Token, Lexeme));
         }
 
+        /// <summary>
+        /// Validates correct single token. Adds token to list.
+        /// </summary>
         public void ProcessSingleToken()
         {
             if (Lexeme == "(")
@@ -195,6 +206,13 @@ namespace JavaCompiler
             tokens.Add(new Token(Token, Lexeme));
         }
 
+        /// <summary>
+        /// Reads a literal string until the ending quote is found. 
+        /// Adds 3 tokens: 2 quote tokens, 1 literal token.
+        /// </summary>
+        /// <example>
+        /// "literal" => QuoteT -> LiteralT -> QuoteT
+        /// </example>
         public void ProcessLiteral()
         {
             tokens.Add(new Token(Symbol.QuoteT, Lexeme));
@@ -222,6 +240,9 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// Determines type of comment, the comment is then skipped.
+        /// </summary>
         public void ProcessComment()
         {
             if (javaFile.PeekNextChar() == '/')
@@ -236,11 +257,14 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// Calls GetNextChar() to skip over comment characters.
+        /// </summary>
         public void SkipComment(Regex commentEndRegex)
         {
             javaFile.GetNextChar();
 
-            while (!commentEndRegex.IsMatch(CurrentChar.ToString() + javaFile.PeekNextChar()))
+            while (!commentEndRegex.IsMatch(CurrentChar.ToString() + javaFile.PeekNextChar()) && !javaFile.program.EndOfStream)
             {
                 javaFile.GetNextChar();
             }
@@ -248,6 +272,9 @@ namespace JavaCompiler
             javaFile.GetNextChar();
         }
 
+        /// <summary>
+        /// Loads the Lexeme until the regular expression no longer matches.
+        /// </summary>
         public void LoadLexeme(Regex lexemeRegex)
         {
             while (lexemeRegex.IsMatch(CurrentChar.ToString()))
@@ -256,8 +283,11 @@ namespace JavaCompiler
                 javaFile.GetNextChar();
             }
         }
-
-    public void Print()
+        
+        /// <summary>
+        /// Prints the list of tokens to the console window.
+        /// </summary>
+        public void Print()
         {
             foreach(Token token in tokens)
             {
