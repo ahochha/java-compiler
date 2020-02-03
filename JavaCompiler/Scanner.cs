@@ -28,9 +28,11 @@ namespace JavaCompiler
         /// </summary>
         public void GetNextToken()
         {
+            javaFile.SkipWhitespace();
+            ProcessComment();
+
             if (!javaFile.program.EndOfStream)
             {
-                javaFile.SkipWhitespace();
                 ProcessToken();
             }
             else
@@ -45,11 +47,10 @@ namespace JavaCompiler
         /// </summary>
         public void ProcessToken()
         {
-            ProcessComment();
             Lexeme = CurrentChar.ToString();
             javaFile.GetNextChar();
 
-            if (char.IsLetter(Lexeme[0]))
+            if (char.IsLetter(Lexeme[0]) || Lexeme == "_")
             {
                 ProcessWordToken();
             }
@@ -57,7 +58,7 @@ namespace JavaCompiler
             {
                 ProcessNumToken();
             }
-            else if (comparisonRegex.IsMatch(Lexeme) && lookAheadCharRegex.IsMatch(javaFile.PeekNextChar().ToString()))
+            else if (comparisonRegex.IsMatch(Lexeme) && lookAheadCharRegex.IsMatch(CurrentChar.ToString()))
             {
                 ProcessDoubleToken();
             }
@@ -82,14 +83,14 @@ namespace JavaCompiler
         /// </summary>
         public void ProcessWordToken()
         {
-            LoadLexeme(word);
+            LoadLexeme(letterDigitUnderscoreRegex);
 
             if (Lexeme == "System")
             {
-                LoadLexeme(print);
+                LoadLexeme(printRegex);
                 Token = Symbol.PrintT;
             }
-            else if (word.IsMatch(Lexeme) && Lexeme.Length <= 31)
+            else if (wordRegex.IsMatch(Lexeme) && Lexeme.Length <= 31)
             {
                 Token = (KeyWords.Contains(Lexeme)) ? (Symbol)KeyWords.FindIndex(t => t == Lexeme) : Symbol.IdT;
             }
@@ -138,6 +139,7 @@ namespace JavaCompiler
                 Token = Symbol.UnknownT;
             }
 
+            javaFile.GetNextChar();
             tokens.Add(new Token(Token, Lexeme));
         }
 
@@ -289,9 +291,12 @@ namespace JavaCompiler
         /// </summary>
         public void Print()
         {
+            Console.WriteLine(string.Format("Token          Attribute"));
+            Console.WriteLine("------------------------");
+
             foreach(Token token in tokens)
             {
-                Console.WriteLine(string.Format("Token: {0, -10}Attribute: {1, -10}", token.token, token.attribute));
+                Console.WriteLine(string.Format("{0, -15}{1, -10}", token.token, token.attribute));
             }
         }
     }

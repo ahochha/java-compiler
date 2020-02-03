@@ -31,8 +31,9 @@ namespace JavaCompiler
         public static Regex comparisonRegex = new Regex(@"<|>|!|=|&|\|");
         public static Regex lookAheadCharRegex = new Regex(@"=|&|\|");
         public static Regex specialCharRegex = new Regex(@"\(|\)|\[|\]|\{|\}|,|;|\.|\+|-|\*|/|=|<|>");
-        public static Regex word = new Regex(@"\w+");
-        public static Regex print = new Regex(@"\.|[a-z]");
+        public static Regex letterDigitUnderscoreRegex = new Regex(@"\w+");
+        public static Regex wordRegex = new Regex(@"^[a-zA-Z]\w*");
+        public static Regex printRegex = new Regex(@"\.|[a-z]");
         public static Regex decimalDigitRegex = new Regex(@"\w|\.");
         public static Regex numberRegex = new Regex(@"^(\d*\.)?\d+$");
         public static Regex oneLineCommentEndRegex = new Regex(@"\n[^\r|\n]");
