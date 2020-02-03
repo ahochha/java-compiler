@@ -54,7 +54,7 @@ namespace JavaCompiler
             {
                 ProcessWordToken();
             }
-            else if (char.IsDigit(Lexeme[0]))
+            else if (char.IsDigit(Lexeme[0]) || Lexeme == "." && char.IsDigit(CurrentChar))
             {
                 ProcessNumToken();
             }
@@ -219,6 +219,8 @@ namespace JavaCompiler
         {
             tokens.Add(new Token(Symbol.QuoteT, Lexeme));
             Token = Symbol.LiteralT;
+            Literal = CurrentChar.ToString();
+            javaFile.GetNextChar();
 
             while (CurrentChar != '\"' && !javaFile.program.EndOfStream)
             {
@@ -250,12 +252,18 @@ namespace JavaCompiler
             if (javaFile.PeekNextChar() == '/')
             {
                 SkipComment(oneLineCommentEndRegex);
+                javaFile.SkipWhitespace();
             }
             else if (javaFile.PeekNextChar() == '*')
             {
                 SkipComment(multiLineCommentEndRegex);
                 javaFile.GetNextChar();
                 javaFile.SkipWhitespace();
+            }
+
+            if (javaFile.PeekNextChar() == '/' || javaFile.PeekNextChar() == '*')
+            {
+                ProcessComment();
             }
         }
 
