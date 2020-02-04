@@ -2,7 +2,7 @@
   "profiles": {
     "JavaCompiler": {
       "commandName": "Project",
-      "commandLineArgs": "prog.java"
+      "commandLineArgs": "prog2.java"
     }
   }
 }

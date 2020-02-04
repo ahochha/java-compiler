@@ -50,11 +50,11 @@ namespace JavaCompiler
             Lexeme = CurrentChar.ToString();
             javaFile.GetNextChar();
 
-            if (char.IsLetter(Lexeme[0]) || Lexeme == "_")
+            if (char.IsLetter(Lexeme[0]))
             {
                 ProcessWordToken();
             }
-            else if (char.IsDigit(Lexeme[0]) || Lexeme == "." && char.IsDigit(CurrentChar))
+            else if (char.IsDigit(Lexeme[0]))
             {
                 ProcessNumToken();
             }
@@ -83,7 +83,7 @@ namespace JavaCompiler
         /// </summary>
         public void ProcessWordToken()
         {
-            LoadLexeme(letterDigitUnderscoreRegex);
+            LoadLexeme(wordRegex);
 
             if (Lexeme == "System")
             {
