@@ -11,13 +11,13 @@ namespace JavaCompiler
 
             Scanner scanner = new Scanner(javaFile);
 
+            Console.WriteLine(string.Format("Token          Attribute"));
+            Console.WriteLine("------------------------");
+
             while (Resources.Token != Resources.Symbol.EofT)
             {
                 scanner.GetNextToken();
             }
-
-            scanner.tokens.Add(new Token(Resources.Token, "Done!"));
-            scanner.Print();
         }
     }
 }

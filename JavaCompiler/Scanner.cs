@@ -8,13 +8,11 @@ namespace JavaCompiler
 {
     public class Scanner : Resources
     {
-        public List<Token> tokens { get; set; }
         public FileHandler javaFile { get; set; }
 
         public Scanner(FileHandler file)
         {
             javaFile = file;
-            tokens = new List<Token>();
             javaFile.GetNextChar();
 
             // Resources
@@ -38,6 +36,8 @@ namespace JavaCompiler
             else
             {
                 Token = Symbol.EofT;
+                Lexeme = "Done!";
+                PrintToken();
             }
         }
 
@@ -72,7 +72,8 @@ namespace JavaCompiler
             }
             else
             {
-                tokens.Add(new Token(Symbol.UnknownT, Lexeme));
+                Token = Symbol.UnknownT;
+                PrintToken();
             }
         }
 
@@ -99,7 +100,7 @@ namespace JavaCompiler
                 Token = Symbol.UnknownT;
             }
 
-            tokens.Add(new Token(Token, Lexeme));
+            PrintToken();
         }
 
         /// <summary>
@@ -111,7 +112,7 @@ namespace JavaCompiler
         {
             LoadLexeme(decimalDigitRegex);
             Token = (numberRegex.IsMatch(Lexeme)) ? Symbol.NumT : Symbol.UnknownT;
-            tokens.Add(new Token(Token, Lexeme));
+            PrintToken();
         }
 
         /// <summary>
@@ -140,7 +141,7 @@ namespace JavaCompiler
             }
 
             javaFile.GetNextChar();
-            tokens.Add(new Token(Token, Lexeme));
+            PrintToken();
         }
 
         /// <summary>
@@ -205,7 +206,7 @@ namespace JavaCompiler
                 Token = Symbol.UnknownT;
             }
 
-            tokens.Add(new Token(Token, Lexeme));
+            PrintToken();
         }
 
         /// <summary>
@@ -217,30 +218,26 @@ namespace JavaCompiler
         /// </example>
         public void ProcessLiteral()
         {
-            tokens.Add(new Token(Symbol.QuoteT, Lexeme));
-            Token = Symbol.LiteralT;
-            Literal = CurrentChar.ToString();
+            Token = Symbol.QuoteT;
+            PrintToken();
+            Lexeme = CurrentChar.ToString();
             javaFile.GetNextChar();
 
-            while (CurrentChar != '\"' && !javaFile.program.EndOfStream)
+            while (CurrentChar != '\"' && !javaFile.program.EndOfStream && CurrentChar != '\n')
             {
-                Literal += CurrentChar;
+                Lexeme += CurrentChar;
                 javaFile.GetNextChar();
-
-                if (javaFile.PeekNextChar() == '\n')
-                {
-                    Token = Symbol.UnknownT;
-                    break;
-                }
             }
 
-            tokens.Add(new Token(Token, Literal));
+            Token = Symbol.LiteralT;
+            PrintToken();
 
             if (CurrentChar == '\"')
             {
+                Token = Symbol.QuoteT;
                 Lexeme = CurrentChar.ToString();
                 javaFile.GetNextChar();
-                tokens.Add(new Token(Symbol.QuoteT, Lexeme));
+                PrintToken();
             }
         }
 
@@ -297,15 +294,9 @@ namespace JavaCompiler
         /// <summary>
         /// Prints the list of tokens to the console window.
         /// </summary>
-        public void Print()
+        public void PrintToken()
         {
-            Console.WriteLine(string.Format("Token          Attribute"));
-            Console.WriteLine("------------------------");
-
-            foreach(Token token in tokens)
-            {
-                Console.WriteLine(string.Format("{0, -15}{1, -10}", token.token, token.attribute));
-            }
+            Console.WriteLine(string.Format("{0, -15}{1, -10}", Token, Lexeme));
         }
     }
 }
