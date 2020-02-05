@@ -38,6 +38,8 @@ namespace JavaCompiler
         public static Regex oneLineCommentEndRegex = new Regex(@"\n[^\r|\n]");
         public static Regex multiLineCommentEndRegex = new Regex(@"\*/");
 
+        public static char invalidChar = '\uffff';
+
         public static Symbol Token { get; set; }
         public static string Lexeme { get; set; }
         public static string Literal { get; set; }

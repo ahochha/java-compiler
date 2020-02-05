@@ -27,9 +27,7 @@ namespace JavaCompiler
             }
             catch
             {
-                Console.WriteLine("Unable to read the Java file.");
-                Console.WriteLine("Be sure you have the file in the same directory as the exe.");
-                Console.WriteLine("This should be the netcoreapp3.0 folder.");
+                Console.WriteLine("ERROR - Unable to read the missing Java file.");
             }
         }
 
@@ -73,6 +71,14 @@ namespace JavaCompiler
         public bool EndOfFile()
         {
             return program.EndOfStream;
+        }
+
+        /// <summary>
+        /// Closes the StreamReader.
+        /// </summary>
+        public void CloseReader()
+        {
+            program.Close();
         }
     }
 }

@@ -35,6 +35,11 @@ namespace JavaCompiler
             }
             else
             {
+                if (CurrentChar != invalidChar)
+                {
+                    ProcessToken();
+                }
+
                 Token = Symbol.EofT;
                 Lexeme = "Done!";
                 PrintToken();
