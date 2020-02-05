@@ -29,7 +29,7 @@ namespace JavaCompiler
             javaFile.SkipWhitespace();
             ProcessComment();
 
-            if (!javaFile.program.EndOfStream)
+            if (!javaFile.EndOfFile())
             {
                 ProcessToken();
             }
@@ -223,10 +223,15 @@ namespace JavaCompiler
             Lexeme = CurrentChar.ToString();
             javaFile.GetNextChar();
 
-            while (CurrentChar != '\"' && !javaFile.program.EndOfStream && CurrentChar != '\n')
+            while (CurrentChar != '\"' && !javaFile.EndOfFile() && CurrentChar != '\n')
             {
                 Lexeme += CurrentChar;
                 javaFile.GetNextChar();
+
+                if (javaFile.EndOfFile())
+                {
+                    Lexeme += CurrentChar;
+                }
             }
 
             Token = Symbol.LiteralT;
@@ -271,7 +276,7 @@ namespace JavaCompiler
         {
             javaFile.GetNextChar();
 
-            while (!commentEndRegex.IsMatch(CurrentChar.ToString() + javaFile.PeekNextChar()) && !javaFile.program.EndOfStream)
+            while (!commentEndRegex.IsMatch(CurrentChar.ToString() + javaFile.PeekNextChar()) && !javaFile.EndOfFile())
             {
                 javaFile.GetNextChar();
             }

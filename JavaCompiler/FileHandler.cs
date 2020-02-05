@@ -8,7 +8,7 @@ namespace JavaCompiler
 {
     public class FileHandler : Resources
     {
-        public StreamReader program {get; set; }
+        private StreamReader program {get; set; }
         public int lineNum { get; set; }
 
         public FileHandler()
@@ -64,6 +64,15 @@ namespace JavaCompiler
             {
                 GetNextChar();
             }
+        }
+
+        /// <summary>
+        /// Checks to see if the current character is at the
+        /// end of the file.
+        /// </summary>
+        public bool EndOfFile()
+        {
+            return program.EndOfStream;
         }
     }
 }
