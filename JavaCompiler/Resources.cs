@@ -10,17 +10,17 @@ namespace JavaCompiler
         // Java reserved words
         public static List<string> KeyWords = new List<string>()
         {
-            "class", "public", "static", "void", "main", "String",
-            "extends", "return", "int", "boolean", "if", "else",
-            "while", "System.out.println", "length", "true", "false",
-            "this", "new"
+            "final", "class", "public", "static", "void", "main", 
+            "String", "extends", "return", "int", "boolean", "if", 
+            "else", "while", "System.out.println", "length", "true", 
+            "false", "this", "new"
         };
 
         // Types of tokens
         public enum Symbol
         {
-            ClassT, PublicT, StaticT, VoidT, MainT, StringT,
-            ExtendsT, ReturnT, IntT, BooleanT, IfT, ElseT,
+            FinalT, ClassT, PublicT, StaticT, VoidT, MainT, 
+            StringT, ExtendsT, ReturnT, IntT, BooleanT, IfT, ElseT,
             WhileT, PrintT, LengthT, TrueT, FalseT, ThisT, NewT, 
             LParenT, RParenT, LBrackT, RBrackT, LBraceT, RBraceT, 
             CommaT, SemiT, PeriodT, IdT, NumT, LiteralT, QuoteT, 
@@ -31,14 +31,13 @@ namespace JavaCompiler
         public static Regex comparisonRegex = new Regex(@"<|>|!|=|&|\|");
         public static Regex lookAheadCharRegex = new Regex(@"=|&|\|");
         public static Regex specialCharRegex = new Regex(@"\(|\)|\[|\]|\{|\}|,|;|\.|\+|-|\*|/|=|<|>");
+        public static Regex commentStartRegex = new Regex(@"^/[/|\*]$");
         public static Regex wordRegex = new Regex(@"\w+");
         public static Regex printRegex = new Regex(@"\.|[a-z]");
         public static Regex decimalDigitRegex = new Regex(@"\d|\.");
         public static Regex numberRegex = new Regex(@"^(\d+\.)?\d+$");
         public static Regex oneLineCommentEndRegex = new Regex(@"\n[^\r|\n]");
         public static Regex multiLineCommentEndRegex = new Regex(@"\*/");
-
-        public static char invalidChar = '\uffff';
 
         public static Symbol Token { get; set; }
         public static string Lexeme { get; set; }

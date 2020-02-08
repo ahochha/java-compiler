@@ -13,10 +13,10 @@ namespace JavaCompiler
         public Scanner(FileHandler file)
         {
             javaFile = file;
-            javaFile.GetNextChar();
 
             // Resources
             Token = Symbol.UnknownT;
+            CurrentChar = '\0';
             Lexeme = "";
             Literal = "";
         }
@@ -27,7 +27,6 @@ namespace JavaCompiler
         public void GetNextToken()
         {
             javaFile.SkipWhitespace();
-            ProcessComment();
 
             if (!javaFile.EndOfFile())
             {
@@ -35,11 +34,6 @@ namespace JavaCompiler
             }
             else
             {
-                if (CurrentChar != invalidChar)
-                {
-                    ProcessToken();
-                }
-
                 Token = Symbol.EofT;
                 Lexeme = "Done!";
                 PrintToken();
@@ -52,10 +46,14 @@ namespace JavaCompiler
         /// </summary>
         public void ProcessToken()
         {
-            Lexeme = CurrentChar.ToString();
             javaFile.GetNextChar();
+            Lexeme = CurrentChar.ToString();
 
-            if (char.IsLetter(Lexeme[0]))
+            if (commentStartRegex.IsMatch(Lexeme + javaFile.PeekNextChar()))
+            {
+                ProcessComment();
+            }
+            else if (char.IsLetter(Lexeme[0]))
             {
                 ProcessWordToken();
             }
@@ -63,7 +61,7 @@ namespace JavaCompiler
             {
                 ProcessNumToken();
             }
-            else if (comparisonRegex.IsMatch(Lexeme) && lookAheadCharRegex.IsMatch(CurrentChar.ToString()))
+            else if (comparisonRegex.IsMatch(Lexeme) && lookAheadCharRegex.IsMatch(javaFile.PeekNextChar().ToString()))
             {
                 ProcessDoubleToken();
             }
@@ -126,6 +124,7 @@ namespace JavaCompiler
         /// </summary>
         public void ProcessDoubleToken()
         {
+            javaFile.GetNextChar();
             Lexeme += CurrentChar;
 
             if (CurrentChar == '=')
@@ -145,7 +144,6 @@ namespace JavaCompiler
                 Token = Symbol.UnknownT;
             }
 
-            javaFile.GetNextChar();
             PrintToken();
         }
 
@@ -225,28 +223,23 @@ namespace JavaCompiler
         {
             Token = Symbol.QuoteT;
             PrintToken();
-            Lexeme = CurrentChar.ToString();
             javaFile.GetNextChar();
+            Lexeme = CurrentChar.ToString();
 
-            while (CurrentChar != '\"' && !javaFile.EndOfFile() && CurrentChar != '\n')
+            while (javaFile.PeekNextChar() != '\"' && javaFile.PeekNextChar() != '\n' && !javaFile.EndOfFile())
             {
-                Lexeme += CurrentChar;
                 javaFile.GetNextChar();
-
-                if (javaFile.EndOfFile())
-                {
-                    Lexeme += CurrentChar;
-                }
+                Lexeme += CurrentChar;
             }
 
             Token = Symbol.LiteralT;
             PrintToken();
 
-            if (CurrentChar == '\"')
+            if (javaFile.PeekNextChar() == '\"')
             {
                 Token = Symbol.QuoteT;
-                Lexeme = CurrentChar.ToString();
                 javaFile.GetNextChar();
+                Lexeme = CurrentChar.ToString();
                 PrintToken();
             }
         }
@@ -259,18 +252,12 @@ namespace JavaCompiler
             if (javaFile.PeekNextChar() == '/')
             {
                 SkipComment(oneLineCommentEndRegex);
-                javaFile.SkipWhitespace();
             }
             else if (javaFile.PeekNextChar() == '*')
             {
                 SkipComment(multiLineCommentEndRegex);
                 javaFile.GetNextChar();
-                javaFile.SkipWhitespace();
-            }
-
-            if (javaFile.PeekNextChar() == '/' || javaFile.PeekNextChar() == '*')
-            {
-                ProcessComment();
+                javaFile.GetNextChar();
             }
         }
 
@@ -279,14 +266,10 @@ namespace JavaCompiler
         /// </summary>
         public void SkipComment(Regex commentEndRegex)
         {
-            javaFile.GetNextChar();
-
             while (!commentEndRegex.IsMatch(CurrentChar.ToString() + javaFile.PeekNextChar()) && !javaFile.EndOfFile())
             {
                 javaFile.GetNextChar();
             }
-
-            javaFile.GetNextChar();
         }
 
         /// <summary>
@@ -294,10 +277,10 @@ namespace JavaCompiler
         /// </summary>
         public void LoadLexeme(Regex lexemeRegex)
         {
-            while (lexemeRegex.IsMatch(CurrentChar.ToString()))
+            while (lexemeRegex.IsMatch(javaFile.PeekNextChar().ToString()))
             {
-                Lexeme += CurrentChar;
                 javaFile.GetNextChar();
+                Lexeme += CurrentChar;
             }
         }
         

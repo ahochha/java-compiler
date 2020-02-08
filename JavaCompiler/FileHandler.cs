@@ -37,7 +37,7 @@ namespace JavaCompiler
         public void GetNextChar()
         {
             CurrentChar = (char)program.Read();
-            
+
             if (CurrentChar == '\n')
             {
                 lineNum++;
@@ -58,7 +58,7 @@ namespace JavaCompiler
         /// </summary>
         public void SkipWhitespace()
         {
-            while (char.IsWhiteSpace(CurrentChar))
+            while (char.IsWhiteSpace(PeekNextChar()))
             {
                 GetNextChar();
             }

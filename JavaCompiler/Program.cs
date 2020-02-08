@@ -12,20 +12,21 @@ namespace JavaCompiler
     {
         static void Main(string[] args)
         {
-            FileHandler javaFile = new FileHandler();
-
             try
             {
+                FileHandler javaFile = new FileHandler();
                 javaFile.ReadLines($@"{Environment.CurrentDirectory}\\" + args[0]);
 
-                Scanner scanner = new Scanner(javaFile);
+                Parser parser = new Parser(javaFile);
+                parser.Prog();
 
-                Console.WriteLine(string.Format("Token          Attribute"));
-                Console.WriteLine("------------------------");
-
-                while (Resources.Token != Resources.Symbol.EofT)
+                if (Resources.Token == Resources.Symbol.EofT)
                 {
-                    scanner.GetNextToken();
+                    Console.WriteLine("Successful compilation!");
+                }
+                else
+                {
+                    Console.WriteLine("ERROR - Unused tokens");
                 }
 
                 javaFile.CloseReader();
