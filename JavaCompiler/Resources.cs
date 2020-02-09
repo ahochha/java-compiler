@@ -27,6 +27,12 @@ namespace JavaCompiler
             AssignOpT, AddOpT, MulOpT, RelOpT, EofT, UnknownT
         }
 
+        // Data types supported
+        public static List<Symbol> Types = new List<Symbol>
+        {
+            Symbol.IntT, Symbol.BooleanT, Symbol.VoidT
+        };
+
         // Regular expressions used in Scanner
         public static Regex comparisonRegex = new Regex(@"<|>|!|=|&|\|");
         public static Regex lookAheadCharRegex = new Regex(@"=|&|\|");
