@@ -1,19 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
+using static JavaCompiler.Resources;
 
 namespace JavaCompiler
 {
-    public class Scanner : Resources
+    public class LexicalAnalyzer
     {
-        public FileHandler javaFile { get; set; }
-
-        public Scanner(FileHandler file)
+        public LexicalAnalyzer()
         {
-            javaFile = file;
-
             // Resources
             Token = Symbol.UnknownT;
             CurrentChar = '\0';
@@ -26,16 +20,16 @@ namespace JavaCompiler
         /// </summary>
         public void GetNextToken()
         {
-            javaFile.SkipWhitespace();
+            JavaFile.SkipWhitespace();
 
-            if (!javaFile.EndOfFile())
+            if (!JavaFile.EndOfFile())
             {
                 ProcessToken();
             }
             else
             {
                 Token = Symbol.EofT;
-                Lexeme = "Done!";
+                Lexeme = "End of file";
                 PrintToken();
             }
         }
@@ -46,10 +40,10 @@ namespace JavaCompiler
         /// </summary>
         public void ProcessToken()
         {
-            javaFile.GetNextChar();
+            JavaFile.GetNextChar();
             Lexeme = CurrentChar.ToString();
 
-            if (commentStartRegex.IsMatch(Lexeme + javaFile.PeekNextChar()))
+            if (commentStartRegex.IsMatch(Lexeme + JavaFile.PeekNextChar()))
             {
                 ProcessComment();
             }
@@ -61,7 +55,7 @@ namespace JavaCompiler
             {
                 ProcessNumToken();
             }
-            else if (comparisonRegex.IsMatch(Lexeme) && lookAheadCharRegex.IsMatch(javaFile.PeekNextChar().ToString()))
+            else if (comparisonRegex.IsMatch(Lexeme) && lookAheadCharRegex.IsMatch(JavaFile.PeekNextChar().ToString()))
             {
                 ProcessDoubleToken();
             }
@@ -124,25 +118,13 @@ namespace JavaCompiler
         /// </summary>
         public void ProcessDoubleToken()
         {
-            javaFile.GetNextChar();
+            JavaFile.GetNextChar();
             Lexeme += CurrentChar;
 
-            if (CurrentChar == '=')
-            {
-                Token = Symbol.RelOpT;
-            }
-            else if (CurrentChar == '&')
-            {
-                Token = Symbol.MulOpT;
-            }
-            else if (CurrentChar == '|')
-            {
-                Token = Symbol.AddOpT;
-            }
-            else
-            {
-                Token = Symbol.UnknownT;
-            }
+            if (CurrentChar == '=') { Token = Symbol.RelOpT; }
+            else if (CurrentChar == '&') { Token = Symbol.MulOpT; }
+            else if (CurrentChar == '|') { Token = Symbol.AddOpT; }
+            else { Token = Symbol.UnknownT; }
 
             PrintToken();
         }
@@ -152,62 +134,20 @@ namespace JavaCompiler
         /// </summary>
         public void ProcessSingleToken()
         {
-            if (Lexeme == "(")
-            {
-                Token = Symbol.LParenT;
-            }
-            else if (Lexeme == ")")
-            {
-                Token = Symbol.RParenT;
-            }
-            else if (Lexeme == "[")
-            {
-                Token = Symbol.LBrackT;
-            }
-            else if (Lexeme == "]")
-            {
-                Token = Symbol.RBrackT;
-            }
-            else if (Lexeme == "{")
-            {
-                Token = Symbol.LBraceT;
-            }
-            else if (Lexeme == "}")
-            {
-                Token = Symbol.RBraceT;
-            }
-            else if (Lexeme == ",")
-            {
-                Token = Symbol.CommaT;
-            }
-            else if (Lexeme == ";")
-            {
-                Token = Symbol.SemiT;
-            }
-            else if (Lexeme == ".")
-            {
-                Token = Symbol.PeriodT;
-            }
-            else if (Lexeme == "=")
-            {
-                Token = Symbol.AssignOpT;
-            }
-            else if (Lexeme == "+" || Lexeme == "-")
-            {
-                Token = Symbol.AddOpT;
-            }
-            else if (Lexeme == "*" || Lexeme == "/")
-            {
-                Token = Symbol.MulOpT;
-            }
-            else if (Lexeme == "<" || Lexeme == ">")
-            {
-                Token = Symbol.RelOpT;
-            }
-            else
-            {
-                Token = Symbol.UnknownT;
-            }
+            if (Lexeme == "(") { Token = Symbol.LParenT; }
+            else if (Lexeme == ")") { Token = Symbol.RParenT; }
+            else if (Lexeme == "[") { Token = Symbol.LBrackT; }
+            else if (Lexeme == "]") { Token = Symbol.RBrackT; }
+            else if (Lexeme == "{") { Token = Symbol.LBraceT; }
+            else if (Lexeme == "}") { Token = Symbol.RBraceT; }
+            else if (Lexeme == ",") { Token = Symbol.CommaT; }
+            else if (Lexeme == ";") { Token = Symbol.SemiT; }
+            else if (Lexeme == ".") { Token = Symbol.PeriodT; }
+            else if (Lexeme == "=") { Token = Symbol.AssignOpT; }
+            else if (Lexeme == "+" || Lexeme == "-") { Token = Symbol.AddOpT; }
+            else if (Lexeme == "*" || Lexeme == "/") { Token = Symbol.MulOpT; }
+            else if (Lexeme == "<" || Lexeme == ">") { Token = Symbol.RelOpT; }
+            else { Token = Symbol.UnknownT; }
 
             PrintToken();
         }
@@ -223,22 +163,22 @@ namespace JavaCompiler
         {
             Token = Symbol.QuoteT;
             PrintToken();
-            javaFile.GetNextChar();
+            JavaFile.GetNextChar();
             Lexeme = CurrentChar.ToString();
 
-            while (javaFile.PeekNextChar() != '\"' && javaFile.PeekNextChar() != '\n' && !javaFile.EndOfFile())
+            while (JavaFile.PeekNextChar() != '\"' && JavaFile.PeekNextChar() != '\n' && !JavaFile.EndOfFile())
             {
-                javaFile.GetNextChar();
+                JavaFile.GetNextChar();
                 Lexeme += CurrentChar;
             }
 
             Token = Symbol.LiteralT;
             PrintToken();
 
-            if (javaFile.PeekNextChar() == '\"')
+            if (JavaFile.PeekNextChar() == '\"')
             {
                 Token = Symbol.QuoteT;
-                javaFile.GetNextChar();
+                JavaFile.GetNextChar();
                 Lexeme = CurrentChar.ToString();
                 PrintToken();
             }
@@ -249,15 +189,15 @@ namespace JavaCompiler
         /// </summary>
         public void ProcessComment()
         {
-            if (javaFile.PeekNextChar() == '/')
+            if (JavaFile.PeekNextChar() == '/')
             {
                 SkipComment(oneLineCommentEndRegex);
             }
-            else if (javaFile.PeekNextChar() == '*')
+            else if (JavaFile.PeekNextChar() == '*')
             {
                 SkipComment(multiLineCommentEndRegex);
-                javaFile.GetNextChar();
-                javaFile.GetNextChar();
+                JavaFile.GetNextChar();
+                JavaFile.GetNextChar();
             }
         }
 
@@ -266,9 +206,9 @@ namespace JavaCompiler
         /// </summary>
         public void SkipComment(Regex commentEndRegex)
         {
-            while (!commentEndRegex.IsMatch(CurrentChar.ToString() + javaFile.PeekNextChar()) && !javaFile.EndOfFile())
+            while (!commentEndRegex.IsMatch(CurrentChar.ToString() + JavaFile.PeekNextChar()) && !JavaFile.EndOfFile())
             {
-                javaFile.GetNextChar();
+                JavaFile.GetNextChar();
             }
         }
 
@@ -277,9 +217,9 @@ namespace JavaCompiler
         /// </summary>
         public void LoadLexeme(Regex lexemeRegex)
         {
-            while (lexemeRegex.IsMatch(javaFile.PeekNextChar().ToString()))
+            while (lexemeRegex.IsMatch(JavaFile.PeekNextChar().ToString()))
             {
-                javaFile.GetNextChar();
+                JavaFile.GetNextChar();
                 Lexeme += CurrentChar;
             }
         }

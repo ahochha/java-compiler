@@ -1,4 +1,5 @@
 ﻿using System;
+using static JavaCompiler.Resources;
 
 //Name: AUSTIN HOCHHALTER
 //Class: CSC 446
@@ -14,13 +15,12 @@ namespace JavaCompiler
         {
             try
             {
-                FileHandler javaFile = new FileHandler();
-                javaFile.ReadLines($@"{Environment.CurrentDirectory}\\" + args[0]);
+                JavaFile.ReadLines($@"{Environment.CurrentDirectory}\\" + args[0]);
 
-                Parser parser = new Parser(javaFile);
+                Parser parser = new Parser();
                 parser.Prog();
 
-                if (Resources.Token == Resources.Symbol.EofT)
+                if (Token == Symbol.EofT)
                 {
                     Console.WriteLine("Successful compilation!");
                 }
@@ -29,7 +29,7 @@ namespace JavaCompiler
                     Console.WriteLine("ERROR - Unused tokens");
                 }
 
-                javaFile.CloseReader();
+                JavaFile.CloseReader();
             }
             catch
             {

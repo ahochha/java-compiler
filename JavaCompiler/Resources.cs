@@ -1,29 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace JavaCompiler
 {
-    public class Resources
+    public static class Resources
     {
         // Java reserved words
         public static List<string> KeyWords = new List<string>()
         {
-            "final", "class", "public", "static", "void", "main", 
-            "String", "extends", "return", "int", "boolean", "if", 
-            "else", "while", "System.out.println", "length", "true", 
+            "final", "class", "public", "static", "void", "main",
+            "String", "extends", "return", "int", "boolean", "if",
+            "else", "while", "System.out.println", "length", "true",
             "false", "this", "new"
         };
 
         // Types of tokens
         public enum Symbol
         {
-            FinalT, ClassT, PublicT, StaticT, VoidT, MainT, 
+            FinalT, ClassT, PublicT, StaticT, VoidT, MainT,
             StringT, ExtendsT, ReturnT, IntT, BooleanT, IfT, ElseT,
-            WhileT, PrintT, LengthT, TrueT, FalseT, ThisT, NewT, 
-            LParenT, RParenT, LBrackT, RBrackT, LBraceT, RBraceT, 
-            CommaT, SemiT, PeriodT, IdT, NumT, LiteralT, QuoteT, 
+            WhileT, PrintT, LengthT, TrueT, FalseT, ThisT, NewT,
+            LParenT, RParenT, LBrackT, RBrackT, LBraceT, RBraceT,
+            CommaT, SemiT, PeriodT, IdT, NumT, LiteralT, QuoteT,
             AssignOpT, AddOpT, MulOpT, RelOpT, EofT, UnknownT
         }
 
@@ -31,6 +29,12 @@ namespace JavaCompiler
         public static List<Symbol> Types = new List<Symbol>
         {
             Symbol.IntT, Symbol.BooleanT, Symbol.VoidT
+        };
+
+        // Tokens that are operators
+        public static List<Symbol> OperatorTokens = new List<Symbol>()
+        {
+            Symbol.AssignOpT, Symbol.RelOpT, Symbol.AddOpT, Symbol.MulOpT
         };
 
         // Regular expressions used in Scanner

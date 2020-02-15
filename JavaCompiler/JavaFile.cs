@@ -1,25 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
-using System.Linq;
+using static JavaCompiler.Resources;
 
 namespace JavaCompiler
 {
-    public class FileHandler : Resources
+    public static class JavaFile
     {
-        private StreamReader program {get; set; }
-        public int lineNum { get; set; }
-
-        public FileHandler()
-        {
-            lineNum = 1;
-        }
+        private static StreamReader program {get; set; }
+        public static int lineNum { get; set; } = 1;
 
         /// <summary>
         /// Reads the java program into a StreamReader.
         /// </summary>
-        public void ReadLines(string filePath)
+        public static void ReadLines(string filePath)
         {
             try
             {
@@ -34,7 +27,7 @@ namespace JavaCompiler
         /// <summary>
         /// Reads the next character from the program.
         /// </summary>
-        public void GetNextChar()
+        public static void GetNextChar()
         {
             CurrentChar = (char)program.Read();
 
@@ -48,7 +41,7 @@ namespace JavaCompiler
         /// Returns the next character in the program without
         /// moving the StreamReader index.
         /// </summary>
-        public char PeekNextChar()
+        public static char PeekNextChar()
         {
             return (char)program.Peek();
         }
@@ -56,7 +49,7 @@ namespace JavaCompiler
         /// <summary>
         /// Skips whitespace characters (\n, \t, \r, etc..)
         /// </summary>
-        public void SkipWhitespace()
+        public static void SkipWhitespace()
         {
             while (char.IsWhiteSpace(PeekNextChar()))
             {
@@ -68,7 +61,7 @@ namespace JavaCompiler
         /// Checks to see if the current character is at the
         /// end of the file.
         /// </summary>
-        public bool EndOfFile()
+        public static bool EndOfFile()
         {
             return program.EndOfStream;
         }
@@ -76,7 +69,7 @@ namespace JavaCompiler
         /// <summary>
         /// Closes the StreamReader.
         /// </summary>
-        public void CloseReader()
+        public static void CloseReader()
         {
             program.Close();
         }

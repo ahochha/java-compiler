@@ -1,28 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using static JavaCompiler.Resources;
 
 namespace JavaCompiler
 {
-    public class Parser : Resources
+    public class Parser
     {
-        public Scanner scanner { get; set; }
+        private LexicalAnalyzer lexicalAnalyzer { get; set; }
 
-        public Parser(FileHandler file)
+        public Parser()
         {
-            scanner = new Scanner(file);
-            scanner.GetNextToken();
+            lexicalAnalyzer = new LexicalAnalyzer();
+            lexicalAnalyzer.GetNextToken();
         }
 
-        public void match(Symbol desired)
+        private void Match(Symbol desired)
         {
             if (Token == desired)
             {
-                scanner.GetNextToken();
+                lexicalAnalyzer.GetNextToken();
             }
             else
             {
-                Console.WriteLine("Parse Error");
+                ErrorHandler.LogError(JavaFile.lineNum, desired);
             }
         }
 
@@ -32,7 +30,7 @@ namespace JavaCompiler
             MainClass();
         }
 
-        public void MoreClasses()
+        private void MoreClasses()
         {
             if (Token == Symbol.ClassT)
             {
@@ -41,146 +39,138 @@ namespace JavaCompiler
             }
         }
 
-        public void MainClass()
+        private void MainClass()
         {
-            match(Symbol.FinalT);
-            match(Symbol.ClassT);
-            match(Symbol.IdT);
-            match(Symbol.LBraceT);
-            match(Symbol.PublicT);
-            match(Symbol.StaticT);
-            match(Symbol.VoidT);
-            match(Symbol.MainT);
-            match(Symbol.LParenT);
-            match(Symbol.StringT);
-            match(Symbol.LBrackT);
-            match(Symbol.RBrackT);
-            match(Symbol.IdT);
-            match(Symbol.RParenT);
-            match(Symbol.LBraceT);
+            Match(Symbol.FinalT);
+            Match(Symbol.ClassT);
+            Match(Symbol.IdT);
+            Match(Symbol.LBraceT);
+            Match(Symbol.PublicT);
+            Match(Symbol.StaticT);
+            Match(Symbol.VoidT);
+            Match(Symbol.MainT);
+            Match(Symbol.LParenT);
+            Match(Symbol.StringT);
+            Match(Symbol.LBrackT);
+            Match(Symbol.RBrackT);
+            Match(Symbol.IdT);
+            Match(Symbol.RParenT);
+            Match(Symbol.LBraceT);
             SeqOfStatements();
-            match(Symbol.RBraceT);
-            match(Symbol.RBraceT);
+            Match(Symbol.RBraceT);
+            Match(Symbol.RBraceT);
         }
 
-        public void ClassDecl()
+        private void ClassDecl()
         {
-            match(Symbol.ClassT);
-            match(Symbol.IdT);
-
-            if (Token == Symbol.ExtendsT)
+            if (Token == Symbol.ClassT)
             {
-                match(Symbol.ExtendsT);
-                match(Symbol.IdT);
-            }
+                Match(Symbol.ClassT);
+                Match(Symbol.IdT);
 
-            match(Symbol.LBraceT);
-            VarDecl();
-            MethodDecl();
-            match(Symbol.RBraceT);
+                if (Token == Symbol.ExtendsT)
+                {
+                    Match(Symbol.ExtendsT);
+                    Match(Symbol.IdT);
+                }
+
+                Match(Symbol.LBraceT);
+                VarDecl();
+                MethodDecl();
+                Match(Symbol.RBraceT);
+            }
         }
 
-        public void VarDecl()
+        private void VarDecl()
         {
             if (Token == Symbol.FinalT)
             {
-                match(Symbol.FinalT);
+                Match(Symbol.FinalT);
                 Type();
-                match(Symbol.IdT);
-                match(Symbol.AssignOpT);
-                match(Symbol.NumT);
-                match(Symbol.SemiT);
+                Match(Symbol.IdT);
+                Match(Symbol.AssignOpT);
+                Match(Symbol.NumT);
+                Match(Symbol.SemiT);
                 VarDecl();
-
             }
             else if (Types.Contains(Token))
             {
                 Type();
                 IdentifierList();
-                match(Symbol.SemiT);
+                Match(Symbol.SemiT);
                 VarDecl();
             }
         }
 
-        public void Type()
+        private void Type()
         {
-            if (Token == Symbol.IntT)
-            {
-                match(Symbol.IntT);
-            }
-            else if (Token == Symbol.BooleanT)
-            {
-                match(Symbol.BooleanT);
-            }
-            else if (Token == Symbol.VoidT)
-            {
-                match(Symbol.VoidT);
-            }
+            Match(Types.Find(t => t == Token));
         }
 
-        public void IdentifierList()
+        private void IdentifierList()
         {
             if (Token == Symbol.IdT)
             {
-                match(Symbol.IdT);
+                Match(Symbol.IdT);
                 IdentifierList();
             }
             else if (Token == Symbol.CommaT)
             {
-                match(Symbol.CommaT);
-                match(Symbol.IdT);
+                Match(Symbol.CommaT);
+                Match(Symbol.IdT);
+                IdentifierList();
             }
         }
 
-        public void MethodDecl()
+        private void MethodDecl()
         {
             if (Token == Symbol.PublicT)
             {
-                match(Symbol.PublicT);
+                Match(Symbol.PublicT);
                 Type();
-                match(Symbol.IdT);
-                match(Symbol.LParenT);
+                Match(Symbol.IdT);
+                Match(Symbol.LParenT);
                 FormalList();
-                match(Symbol.RParenT);
-                match(Symbol.LBraceT);
+                Match(Symbol.RParenT);
+                Match(Symbol.LBraceT);
                 VarDecl();
                 SeqOfStatements();
-                match(Symbol.ReturnT);
+                Match(Symbol.ReturnT);
                 Expr();
-                match(Symbol.SemiT);
-                match(Symbol.RBraceT);
+                Match(Symbol.SemiT);
+                Match(Symbol.RBraceT);
                 MethodDecl();
             }
         }
 
-        public void FormalList()
+        private void FormalList()
         {
             if (Types.Contains(Token))
             {
                 Type();
-                match(Symbol.IdT);
+                Match(Symbol.IdT);
                 FormalRest();
                 FormalList();
             }
         }
 
-        public void FormalRest()
+        private void FormalRest()
         {
             if (Token == Symbol.CommaT)
             {
-                match(Symbol.CommaT);
+                Match(Symbol.CommaT);
                 Type();
-                match(Symbol.IdT);
+                Match(Symbol.IdT);
                 FormalRest();
             }
         }
 
-        public void SeqOfStatements()
+        private void SeqOfStatements()
         {
             // not yet implemented
         }
 
-        public void Expr()
+        private void Expr()
         {
             // not yet implemented
         }
