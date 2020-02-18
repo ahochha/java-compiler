@@ -5,9 +5,17 @@ namespace JavaCompiler
 {
     public static class ErrorHandler
     {
-        public static void LogError(int lineNum, Symbol desired)
+        public static void LogError(Symbol desired)
         {
-            Console.WriteLine($"ERROR - Line {lineNum} - Expected \"{GetExpectedLexeme(desired)}\", found \"{Lexeme}\"");
+            if (desired != Symbol.UnknownT)
+            {
+                Console.WriteLine($"ERROR - Line {JavaFile.lineNum} - Expected {GetExpectedLexeme(desired)}, found \"{Lexeme}\"");
+            }
+            else
+            {
+                Console.WriteLine($"ERROR - Line {JavaFile.lineNum} - " + SpecialErrorMsg);
+            }
+
             Environment.Exit(102);
         }
 
@@ -15,19 +23,26 @@ namespace JavaCompiler
         {
             string expected = "";
 
-            if ((int)desired < KeyWords.Count) { expected = KeyWords[(int)desired]; }
+            if ((int)desired < KeyWords.Count) { expected = "\"" + KeyWords[(int)desired] + "\""; }
             else if (OperatorTokens.Contains(desired)) { expected = "an operator"; }
-            else if (desired == Symbol.LParenT) { expected = "("; }
-            else if (desired == Symbol.RParenT) { expected = ")"; }
-            else if (desired == Symbol.LBrackT) { expected = "["; }
-            else if (desired == Symbol.RBrackT) { expected = "]"; }
-            else if (desired == Symbol.LBraceT) { expected = "{"; }
-            else if (desired == Symbol.RBraceT) { expected = "}"; }
-            else if (desired == Symbol.CommaT)  { expected = ","; }
-            else if (desired == Symbol.SemiT)   { expected = ";"; }
-            else if (desired == Symbol.PeriodT) { expected = "."; }
+            else if (desired == Symbol.IdT)     { expected = "an identifier"; }
+            else if (desired == Symbol.LParenT) { expected = "\"(\""; }
+            else if (desired == Symbol.RParenT) { expected = "\")\""; }
+            else if (desired == Symbol.LBrackT) { expected = "\"[\""; }
+            else if (desired == Symbol.RBrackT) { expected = "\"]\""; }
+            else if (desired == Symbol.LBraceT) { expected = "\"{\""; }
+            else if (desired == Symbol.RBraceT) { expected = "\"}\""; }
+            else if (desired == Symbol.CommaT)  { expected = "\",\""; }
+            else if (desired == Symbol.SemiT)   { expected = "\";\""; }
+            else if (desired == Symbol.PeriodT) { expected = "\".\""; }
 
             return expected;
+        }
+
+        public static void LogDetailedError(string errorMsg)
+        {
+            SpecialErrorMsg = errorMsg;
+            LogError(Symbol.UnknownT);
         }
     }
 }

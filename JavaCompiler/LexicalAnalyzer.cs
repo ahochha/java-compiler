@@ -45,7 +45,9 @@ namespace JavaCompiler
 
             if (commentStartRegex.IsMatch(Lexeme + JavaFile.PeekNextChar()))
             {
+                // skip the comment then continue processing the token
                 ProcessComment();
+                GetNextToken();
             }
             else if (char.IsLetter(Lexeme[0]))
             {
@@ -77,7 +79,7 @@ namespace JavaCompiler
         /// <summary>
         /// Reads characters into Lexeme, then validates for correct 
         /// word token. Word token can be a reserved word (KeyWords list) 
-        /// or an identifier (IdT). Adds token to list.
+        /// or an identifier (IdT).
         /// </summary>
         public void ProcessWordToken()
         {
@@ -85,6 +87,7 @@ namespace JavaCompiler
 
             if (Lexeme == "System")
             {
+                // continues reading for special case -> System.out.println
                 LoadLexeme(printRegex);
                 Token = Symbol.PrintT;
             }
@@ -103,7 +106,7 @@ namespace JavaCompiler
         /// <summary>
         /// Reads characters into Lexeme, then validates for correct 
         /// number token. Number token (NumT) can be an integer or double 
-        /// value. Adds token to list.
+        /// value.
         /// </summary>
         public void ProcessNumToken()
         {
@@ -114,7 +117,7 @@ namespace JavaCompiler
 
         /// <summary>
         /// Reads next character into Lexeme, then validates correct 
-        /// double token. Adds token to list.
+        /// double token.
         /// </summary>
         public void ProcessDoubleToken()
         {
@@ -130,7 +133,7 @@ namespace JavaCompiler
         }
 
         /// <summary>
-        /// Validates correct single token. Adds token to list.
+        /// Validates correct single token.
         /// </summary>
         public void ProcessSingleToken()
         {

@@ -26,15 +26,15 @@ namespace JavaCompiler
                 }
                 else
                 {
-                    Console.WriteLine("ERROR - Unused tokens");
+                    Console.WriteLine("ERROR - Unused tokens, please check for correct Java syntax.");
                 }
 
                 JavaFile.CloseReader();
             }
             catch
             {
-                Console.WriteLine("Please place your test file in JavaCompiler > bin > Debug > netcoreapp3.0");
-                Console.WriteLine("Also be sure you have the file being input into the program as an application argument.");
+                Console.WriteLine("The compiler encountered an error, please try compiling again.");
+                Environment.Exit(100);
             }
         }
     }

@@ -37,7 +37,7 @@ namespace JavaCompiler
             Symbol.AssignOpT, Symbol.RelOpT, Symbol.AddOpT, Symbol.MulOpT
         };
 
-        // Regular expressions used in Scanner
+        // Regular expressions used in LexicalAnalyzer
         public static Regex comparisonRegex = new Regex(@"<|>|!|=|&|\|");
         public static Regex lookAheadCharRegex = new Regex(@"=|&|\|");
         public static Regex specialCharRegex = new Regex(@"\(|\)|\[|\]|\{|\}|,|;|\.|\+|-|\*|/|=|<|>");
@@ -55,5 +55,6 @@ namespace JavaCompiler
         public static char CurrentChar { get; set; }
         public static int Value { get; set; }
         public static double ValueR { get; set; }
+        public static string SpecialErrorMsg { get; set; }
     }
 }
