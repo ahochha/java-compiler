@@ -20,20 +20,20 @@ namespace JavaCompiler
                 Parser parser = new Parser();
                 parser.Prog();
 
-                if (Token == Symbol.EofT)
+                if (Token == Tokens.EofT)
                 {
-                    Console.WriteLine("Successful compilation!");
+                    Console.WriteLine("successful compilation!");
                 }
                 else
                 {
-                    Console.WriteLine("ERROR - Unused tokens, please check for correct Java syntax.");
+                    Console.WriteLine("error - unused tokens, please check for correct Java syntax");
                 }
 
                 JavaFile.CloseReader();
             }
             catch
             {
-                Console.WriteLine("The compiler encountered an error, please try compiling again.");
+                Console.WriteLine("note - the compiler encountered an error, please try compiling again");
                 Environment.Exit(100);
             }
         }

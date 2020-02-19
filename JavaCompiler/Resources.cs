@@ -14,8 +14,8 @@ namespace JavaCompiler
             "false", "this", "new"
         };
 
-        // Types of tokens
-        public enum Symbol
+        // Types of Tokens
+        public enum Tokens
         {
             FinalT, ClassT, PublicT, StaticT, VoidT, MainT,
             StringT, ExtendsT, ReturnT, IntT, BooleanT, IfT, ElseT,
@@ -26,15 +26,15 @@ namespace JavaCompiler
         }
 
         // Data types supported
-        public static List<Symbol> Types = new List<Symbol>
+        public static List<Tokens> Types = new List<Tokens>
         {
-            Symbol.IntT, Symbol.BooleanT, Symbol.VoidT
+            Tokens.IntT, Tokens.BooleanT, Tokens.VoidT
         };
 
-        // Tokens that are operators
-        public static List<Symbol> OperatorTokens = new List<Symbol>()
+        // Tokenss that are operators
+        public static List<Tokens> OperatorTokens = new List<Tokens>()
         {
-            Symbol.AssignOpT, Symbol.RelOpT, Symbol.AddOpT, Symbol.MulOpT
+            Tokens.AssignOpT, Tokens.RelOpT, Tokens.AddOpT, Tokens.MulOpT
         };
 
         // Regular expressions used in LexicalAnalyzer
@@ -49,12 +49,11 @@ namespace JavaCompiler
         public static Regex oneLineCommentEndRegex = new Regex(@"\n[^\r|\n]");
         public static Regex multiLineCommentEndRegex = new Regex(@"\*/");
 
-        public static Symbol Token { get; set; }
+        public static Tokens Token { get; set; }
         public static string Lexeme { get; set; }
         public static string Literal { get; set; }
         public static char CurrentChar { get; set; }
         public static int Value { get; set; }
         public static double ValueR { get; set; }
-        public static string SpecialErrorMsg { get; set; }
     }
 }

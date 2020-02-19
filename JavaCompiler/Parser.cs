@@ -12,7 +12,7 @@ namespace JavaCompiler
             lexicalAnalyzer.GetNextToken();
         }
 
-        private void Match(Symbol desired)
+        private void Match(Tokens desired)
         {
             if (Token == desired)
             {
@@ -32,84 +32,84 @@ namespace JavaCompiler
 
         private void MoreClasses()
         {
-            if (Token == Symbol.ClassT)
+            if (Token == Tokens.ClassT)
             {
                 ClassDecl();
                 MoreClasses();
             }
-            else if (Token == Symbol.IdT)
+            else if (Token == Tokens.IdT)
             {
-                ErrorHandler.LogDetailedError($"Expected class declaration, found \"{Lexeme}\"");
+                ErrorHandler.LogError($"expected class declaration, found \"{Lexeme}\"");
             }
         }
 
         private void MainClass()
         {
-            Match(Symbol.FinalT);
-            Match(Symbol.ClassT);
-            Match(Symbol.IdT);
-            Match(Symbol.LBraceT);
-            Match(Symbol.PublicT);
-            Match(Symbol.StaticT);
-            Match(Symbol.VoidT);
-            Match(Symbol.MainT);
-            Match(Symbol.LParenT);
-            Match(Symbol.StringT);
-            Match(Symbol.LBrackT);
-            Match(Symbol.RBrackT);
-            Match(Symbol.IdT);
-            Match(Symbol.RParenT);
-            Match(Symbol.LBraceT);
+            Match(Tokens.FinalT);
+            Match(Tokens.ClassT);
+            Match(Tokens.IdT);
+            Match(Tokens.LBraceT);
+            Match(Tokens.PublicT);
+            Match(Tokens.StaticT);
+            Match(Tokens.VoidT);
+            Match(Tokens.MainT);
+            Match(Tokens.LParenT);
+            Match(Tokens.StringT);
+            Match(Tokens.LBrackT);
+            Match(Tokens.RBrackT);
+            Match(Tokens.IdT);
+            Match(Tokens.RParenT);
+            Match(Tokens.LBraceT);
             SeqOfStatements();
-            Match(Symbol.RBraceT);
-            Match(Symbol.RBraceT);
+            Match(Tokens.RBraceT);
+            Match(Tokens.RBraceT);
         }
 
         private void ClassDecl()
         {
-            Match(Symbol.ClassT);
-            Match(Symbol.IdT);
+            Match(Tokens.ClassT);
+            Match(Tokens.IdT);
 
-            if (Token == Symbol.ExtendsT)
+            if (Token == Tokens.ExtendsT)
             {
-                Match(Symbol.ExtendsT);
-                Match(Symbol.IdT);
+                Match(Tokens.ExtendsT);
+                Match(Tokens.IdT);
             }
 
-            Match(Symbol.LBraceT);
+            Match(Tokens.LBraceT);
             VarDecl();
             MethodDecl();
-            Match(Symbol.RBraceT);
+            Match(Tokens.RBraceT);
         }
 
         private void VarDecl()
         {
-            if (Token == Symbol.FinalT)
+            if (Token == Tokens.FinalT)
             {
-                Match(Symbol.FinalT);
+                Match(Tokens.FinalT);
                 Type();
-                Match(Symbol.IdT);
-                Match(Symbol.AssignOpT);
-                Match(Symbol.NumT);
-                Match(Symbol.SemiT);
+                Match(Tokens.IdT);
+                Match(Tokens.AssignOpT);
+                Match(Tokens.NumT);
+                Match(Tokens.SemiT);
                 VarDecl();
             }
             else if (Types.Contains(Token))
             {
                 Type();
 
-                if (Token == Symbol.SemiT)
+                if (Token == Tokens.SemiT)
                 {
-                    ErrorHandler.LogDetailedError($"Expected an identifier, found \"{Lexeme}\"");
+                    ErrorHandler.LogError($"expected an identifier, found \"{Lexeme}\"");
                 }
 
                 IdentifierList();
-                Match(Symbol.SemiT);
+                Match(Tokens.SemiT);
                 VarDecl();
             }
-            else if (Token == Symbol.IdT)
+            else if (Token == Tokens.IdT)
             {
-                ErrorHandler.LogDetailedError($"Expected type declaration, found \"{Lexeme}\"");
+                ErrorHandler.LogError($"expected type declaration, found \"{Lexeme}\"");
             }
         }
 
@@ -121,25 +121,25 @@ namespace JavaCompiler
             }
             else
             {
-                ErrorHandler.LogDetailedError($"Expected type declaration, found \"{Lexeme}\"");
+                ErrorHandler.LogError($"expected type declaration, found \"{Lexeme}\"");
             }
         }
 
         private void IdentifierList()
         {
-            if (Token == Symbol.IdT)
+            if (Token == Tokens.IdT)
             {
-                Match(Symbol.IdT);
+                Match(Tokens.IdT);
                 IdentifierList();
             }
-            else if (Token == Symbol.CommaT)
+            else if (Token == Tokens.CommaT)
             {
-                Match(Symbol.CommaT);
-                Match(Symbol.IdT);
+                Match(Tokens.CommaT);
+                Match(Tokens.IdT);
 
-                if (Token == Symbol.IdT)
+                if (Token == Tokens.IdT)
                 {
-                    ErrorHandler.LogDetailedError("Expected \",\" before next identifier");
+                    ErrorHandler.LogError("expected \",\" before next identifier");
                 }
 
                 IdentifierList();
@@ -148,21 +148,21 @@ namespace JavaCompiler
 
         private void MethodDecl()
         {
-            if (Token == Symbol.PublicT)
+            if (Token == Tokens.PublicT)
             {
-                Match(Symbol.PublicT);
+                Match(Tokens.PublicT);
                 Type();
-                Match(Symbol.IdT);
-                Match(Symbol.LParenT);
+                Match(Tokens.IdT);
+                Match(Tokens.LParenT);
                 FormalList();
-                Match(Symbol.RParenT);
-                Match(Symbol.LBraceT);
+                Match(Tokens.RParenT);
+                Match(Tokens.LBraceT);
                 VarDecl();
                 SeqOfStatements();
-                Match(Symbol.ReturnT);
+                Match(Tokens.ReturnT);
                 Expr();
-                Match(Symbol.SemiT);
-                Match(Symbol.RBraceT);
+                Match(Tokens.SemiT);
+                Match(Tokens.RBraceT);
                 MethodDecl();
             }
         }
@@ -172,28 +172,28 @@ namespace JavaCompiler
             if (Types.Contains(Token))
             {
                 Type();
-                Match(Symbol.IdT);
+                Match(Tokens.IdT);
                 FormalRest();
                 FormalList();
             }
-            else if (Token == Symbol.IdT)
+            else if (Token == Tokens.IdT)
             {
-                ErrorHandler.LogDetailedError($"Expected type declaration, found \"{Lexeme}\"");
+                ErrorHandler.LogError($"expected type declaration, found \"{Lexeme}\"");
             }
         }
 
         private void FormalRest()
         {
-            if (Token == Symbol.CommaT)
+            if (Token == Tokens.CommaT)
             {
-                Match(Symbol.CommaT);
+                Match(Tokens.CommaT);
                 Type();
-                Match(Symbol.IdT);
+                Match(Tokens.IdT);
                 FormalRest();
             }
-            else if (Types.Contains(Token) || Token == Symbol.IdT)
+            else if (Types.Contains(Token) || Token == Tokens.IdT)
             {
-                ErrorHandler.LogDetailedError($"Expected \",\", found \"{Lexeme}\"");
+                ErrorHandler.LogError($"expected \",\", found \"{Lexeme}\"");
             }
         }
 
