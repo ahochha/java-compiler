@@ -12,6 +12,9 @@ namespace JavaCompiler
             lexicalAnalyzer.GetNextToken();
         }
 
+        /// <summary>
+        /// Checks for a match between the current token and the desired token.
+        /// </summary>
         private void Match(Tokens desired)
         {
             if (Token == desired)
@@ -24,12 +27,18 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// Prog -> MoreClasses MainClass
+        /// </summary>
         public void Prog()
         {
             MoreClasses();
             MainClass();
         }
 
+        /// <summary>
+        /// MoreClasses -> ClassDecl MoreClasses | ε
+        /// </summary>
         private void MoreClasses()
         {
             if (Token == Tokens.ClassT)
@@ -43,6 +52,13 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// MainClass -> FinalT ClassT IdT { 
+        ///                 PublicT StaticT VoidT MainT ( StringT [ ] IdT ) { 
+        ///                     SeqOfStatements 
+        ///                 }
+        ///              }
+        /// </summary>
         private void MainClass()
         {
             Match(Tokens.FinalT);
@@ -65,6 +81,11 @@ namespace JavaCompiler
             Match(Tokens.RBraceT);
         }
 
+        /// <summary>
+        /// ClassDecl -> ClassT IdT { VarDecl MethodDecl } |
+        ///              ClassT IdT ExtendsT IdT { VarDecl MethodDecl } |
+        ///              ε
+        /// </summary>
         private void ClassDecl()
         {
             Match(Tokens.ClassT);
@@ -82,6 +103,11 @@ namespace JavaCompiler
             Match(Tokens.RBraceT);
         }
 
+        /// <summary>
+        /// VarDecl -> Type IdentifierList ; VarDecl |
+        ///            FinalT Type IdT = NumT ; VarDecl |
+        ///            ε
+        /// </summary>
         private void VarDecl()
         {
             if (Token == Tokens.FinalT)
@@ -113,6 +139,9 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// Type -> IntT | BooleanT | VoidT
+        /// </summary>
         private void Type()
         {
             if (Types.Contains(Token))
@@ -125,6 +154,9 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// IdentifierList -> IdT | IdentifierList , IdT
+        /// </summary>
         private void IdentifierList()
         {
             if (Token == Tokens.IdT)
@@ -146,6 +178,12 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// MethodDecl -> PublicT Type IdT ( FormalList ) {
+        ///                   VarDecl SeqOfStatements ReturnT Expr ;
+        ///               } | 
+        ///               ε               
+        /// </summary>
         private void MethodDecl()
         {
             if (Token == Tokens.PublicT)
@@ -167,6 +205,9 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// FormalList -> Type IdT FormalRest | ε
+        /// </summary>
         private void FormalList()
         {
             if (Types.Contains(Token))
@@ -182,6 +223,9 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// FormalRest -> , Type IdT FormalRest | ε
+        /// </summary>
         private void FormalRest()
         {
             if (Token == Tokens.CommaT)
@@ -197,11 +241,17 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// ε
+        /// </summary>
         private void SeqOfStatements()
         {
             // not yet implemented
         }
 
+        /// <summary>
+        /// ε
+        /// </summary>
         private void Expr()
         {
             // not yet implemented

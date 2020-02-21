@@ -5,18 +5,27 @@ namespace JavaCompiler
 {
     public static class ErrorHandler
     {
+        /// <summary>
+        /// Handles errors coming from Match(desired).
+        /// </summary>
         public static void LogError(Tokens desired)
         {
             Console.WriteLine($"error - line {JavaFile.lineNum} - expected {GetExpectedLexeme(desired)}, found \"{Lexeme}\"");
             Environment.Exit(102);
         }
 
+        /// <summary>
+        /// Handles special case errors.
+        /// </summary>
         public static void LogError(string errorMsg)
         {
             Console.WriteLine($"error - line {JavaFile.lineNum} - " + errorMsg);
             Environment.Exit(102);
         }
 
+        /// <summary>
+        /// Converts the expected token to its lexeme equivalent
+        /// </summary>
         public static string GetExpectedLexeme(Tokens desired)
         {
             string expected = "";

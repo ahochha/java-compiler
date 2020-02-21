@@ -3,8 +3,8 @@ using static JavaCompiler.Resources;
 
 //Name: AUSTIN HOCHHALTER
 //Class: CSC 446
-//Assignment: 1
-//Due Date: 2/5/2020
+//Assignment: 3
+//Due Date: 2/21/2020
 //Professor: HAMER
 
 namespace JavaCompiler
