@@ -3,8 +3,8 @@ using static JavaCompiler.Resources;
 
 //Name: AUSTIN HOCHHALTER
 //Class: CSC 446
-//Assignment: 3
-//Due Date: 2/21/2020
+//Assignment: 4
+//Due Date: 3/6/2020
 //Professor: HAMER
 
 namespace JavaCompiler
@@ -33,7 +33,8 @@ namespace JavaCompiler
             }
             catch
             {
-                Console.WriteLine("note - the compiler encountered an error, please try compiling again");
+                Console.WriteLine("error - the compiler encountered an unknown error, please try compiling again");
+                Console.WriteLine("note - be sure you have the file being input into the program as an application argument");
                 Environment.Exit(100);
             }
         }

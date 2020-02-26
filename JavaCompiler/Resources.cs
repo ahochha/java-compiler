@@ -31,7 +31,7 @@ namespace JavaCompiler
             Tokens.IntT, Tokens.BooleanT, Tokens.VoidT
         };
 
-        // Tokenss that are operators
+        // Tokens that are operators
         public static List<Tokens> OperatorTokens = new List<Tokens>()
         {
             Tokens.AssignOpT, Tokens.RelOpT, Tokens.AddOpT, Tokens.MulOpT

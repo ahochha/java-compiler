@@ -22,7 +22,6 @@ namespace JavaCompiler
             {
                 Console.WriteLine("error - unable to read the missing Java file");
                 Console.WriteLine("note - please place your test file in JavaCompiler > bin > Debug > netcoreapp3.0");
-                Console.WriteLine("note - also be sure you have the file being input into the program as an application argument");
                 Environment.Exit(101);
             }
         }
