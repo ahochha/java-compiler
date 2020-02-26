@@ -26,7 +26,7 @@ namespace JavaCompiler
                 }
                 else
                 {
-                    Console.WriteLine("error - unused tokens, please check for correct Java syntax");
+                    Console.WriteLine($"error - line {JavaFile.lineNum} - unused tokens, please check for correct Java syntax");
                 }
 
                 JavaFile.CloseReader();
