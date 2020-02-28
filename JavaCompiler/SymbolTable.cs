@@ -4,67 +4,32 @@ using static JavaCompiler.Resources;
 
 namespace JavaCompiler
 {
-    public enum VarType { intType, booleanType, voidType }
-    public enum ConstType { intType, realType }
+    public enum VarType { intType, booleanType, floatType }
+    public enum ConstType { intType, floatType }
+    public enum ReturnType { intType, booleanType, floatType, voidType }
     public enum PassingModes { passByValue, passByRef }
     public enum EntryType { varEntry, constEntry, methodEntry, classEntry }
 
-    public class Variable
-    {
-        public VarType varType { get; set; }
-        public int offset { get; set; }
-        public int size { get; set; }
-    }
-
-    public class Constant
-    {
-        public ConstType constType { get; set; }
-        public int offset { get; set; }
-        public int value { get; set; }
-        public float valueR { get; set; }
-    }
-
-    public class Class
-    {
-        public int sizeOfLocalVars { get; set; }
-        public List<string> methodNames { get; set; }
-        public List<string> varNames { get; set; }
-    }
-
-    public class Method
-    {
-        public List<VarType> parameterTypes { get; set; }
-        public List<PassingModes> parameterPassingModes { get; set; }
-        public int sizeOfLocalVars { get; set; }
-        public int numOfParameters { get; set; }
-    }
-
-    public class TableEntry
-    {
-        public Tokens token { get; set; }
-        public string lexeme { get; set; }
-        public int depth { get; set; }
-        public EntryType typeOfEntry { get; set; }
-        public dynamic entryData { get; set; }
-
-        public TableEntry(EntryType type)
-        {
-            typeOfEntry = type;
-
-            if (typeOfEntry == EntryType.varEntry) { entryData = new Variable(); }
-            else if (typeOfEntry == EntryType.constEntry) { entryData = new Constant(); }
-            else if (typeOfEntry == EntryType.classEntry) { entryData = new Class(); }
-            else if (typeOfEntry == EntryType.methodEntry) { entryData = new Method(); }
-        }
-    }
-
     public class SymbolTable
     {
-        public List<TableEntry> symbolTable { get; set; }
+        public List<ITableEntry> symbolTable { get; set; }
 
         public SymbolTable()
         {
-            symbolTable = new List<TableEntry>();
+            symbolTable = new List<ITableEntry>();
+
+            Variable entry = new Variable();
+            entry.offset = 4;
+            entry.size = 10;
+            entry.lexeme = "test";
+            symbolTable.Add(entry);
+
+            if(symbolTable[0].typeOfEntry == EntryType.varEntry)
+            {
+                Variable testingVar = (Variable)symbolTable[0];
+                Console.WriteLine(testingVar.offset);
+            }
+            //else if ...
         }
 
         public void Insert(string lexeme, Tokens token, int depth)
@@ -72,7 +37,7 @@ namespace JavaCompiler
             throw new NotImplementedException();
         }
 
-        public TableEntry Lookup(string lexeme)
+        public ITableEntry Lookup(string lexeme)
         {
             throw new NotImplementedException();
         }
