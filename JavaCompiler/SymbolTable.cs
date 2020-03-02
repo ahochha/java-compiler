@@ -1,60 +1,90 @@
 ﻿using System;
 using System.Collections.Generic;
-using static JavaCompiler.Resources;
 
 namespace JavaCompiler
 {
-    public enum VarType { intType, booleanType, floatType }
+    public enum VarType { intType, booleanType, floatType, voidType }
     public enum ConstType { intType, floatType }
-    public enum ReturnType { intType, booleanType, floatType, voidType }
     public enum PassingModes { passByValue, passByRef }
     public enum EntryType { varEntry, constEntry, methodEntry, classEntry }
 
     public class SymbolTable
     {
-        public List<ITableEntry> symbolTable { get; set; }
+        public const int tableSize = 211;
+        public List<ITableEntry>[] symbolTable { get; set; }
 
         public SymbolTable()
         {
-            symbolTable = new List<ITableEntry>();
+            symbolTable = new List<ITableEntry>[tableSize];
 
-            Variable entry = new Variable();
-            entry.offset = 4;
-            entry.size = 10;
-            entry.lexeme = "test";
-            symbolTable.Add(entry);
-
-            if(symbolTable[0].typeOfEntry == EntryType.varEntry)
+            for (int i = 0; i < tableSize; i++)
             {
-                Variable testingVar = (Variable)symbolTable[0];
-                Console.WriteLine(testingVar.offset);
+                symbolTable[i] = new List<ITableEntry>();
             }
-            //else if ...
         }
 
-        public void Insert(string lexeme, Tokens token, int depth)
+        public void Upsert(ITableEntry entry)
         {
-            throw new NotImplementedException();
+            uint hash = Hash(entry.lexeme);
+            ITableEntry existingEntry = (symbolTable[hash].Count > 0) ? symbolTable[hash][0] : null;
+
+            if (existingEntry != null)
+            {
+                symbolTable[hash][0] = entry;
+            }
+            else
+            {
+                symbolTable[hash].Insert(0, entry);
+            }
         }
 
         public ITableEntry Lookup(string lexeme)
         {
-            throw new NotImplementedException();
+            uint hash = Hash(lexeme);
+
+            return (symbolTable[hash].Count > 0) ? symbolTable[Hash(lexeme)][0] : null;
         }
         
         public void DeleteDepth(int depth)
         {
-            throw new NotImplementedException();
+            foreach (List<ITableEntry> entries in symbolTable)
+            {
+                if (entries.Count > depth)
+                {
+                    entries.RemoveAt(depth);
+                }
+            }
+        }
+
+        private uint Hash(string lexeme)
+        {
+            uint hash = 0, g;
+
+            foreach (char c in lexeme)
+            {
+                hash = (hash << 4) + (byte)c;
+
+                if ((g = hash & 0xf0000000) != 0)
+                {
+                    hash ^= (g >> 24);
+                    hash ^= g;
+                }
+            }
+
+            return hash % tableSize;
         }
 
         public void Display(int depth)
         {
-            throw new NotImplementedException();
-        }
+            Console.WriteLine("Entry Lexemes:");
 
-        private int Hash(string lexeme)
-        {
-            throw new NotImplementedException();
+            foreach (List<ITableEntry> entries in symbolTable)
+            {
+                if (entries.Count > depth)
+                {
+                    Console.WriteLine(entries[depth].lexeme);
+                }
+            }
         }
     }
 }

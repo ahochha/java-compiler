@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using static JavaCompiler.Resources;
 
 //Name: AUSTIN HOCHHALTER
@@ -14,6 +15,17 @@ namespace JavaCompiler
         static void Main(string[] args)
         {
             SymbolTable symbolTable = new SymbolTable();
+
+            TableEntry entry = new TableEntry("testing", Tokens.IdT, 0);
+            symbolTable.Upsert(entry);
+            Variable variable = symbolTable.Lookup("testing") as TableEntry;
+            variable.typeOfEntry = EntryType.varEntry;
+            variable.varType = VarType.intType;
+            variable.offset = 4;
+            variable.size = 6;
+            symbolTable.Upsert(variable);
+            symbolTable.Display(0);
+
             //try
             //{
             //    JavaFile.ReadLines($@"{Environment.CurrentDirectory}\\" + args[0]);
