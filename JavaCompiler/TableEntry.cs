@@ -43,16 +43,16 @@ namespace JavaCompiler
 
         public static implicit operator Variable(TableEntry entry)
         {
-            return new Variable()
+            return (entry != null) ? new Variable()
             {
                 lexeme = entry.lexeme,
                 token = entry.token,
                 depth = entry.depth
-            };
+            } : new Variable();
         }
     }
 
-    public class Constant<ValueT> : ITableEntry
+    public class Constant<ValueT> : ITableEntry, IValue<ValueT>
     {
         public Tokens token { get; set; }
         public string lexeme { get; set; }
@@ -60,16 +60,16 @@ namespace JavaCompiler
         public EntryType typeOfEntry { get; set; }
         public ConstType constType { get; set; }
         public int offset { get; set; }
-        public IValue<ValueT> value { get; set; }
+        public ValueT value { get; set; }
 
         public static implicit operator Constant<ValueT>(TableEntry entry)
         {
-            return new Constant<ValueT>()
+            return (entry != null) ? new Constant<ValueT>()
             {
                 lexeme = entry.lexeme,
                 token = entry.token,
                 depth = entry.depth
-            };
+            } : new Constant<ValueT>();
         }
     }
 
@@ -80,17 +80,17 @@ namespace JavaCompiler
         public int depth { get; set; }
         public EntryType typeOfEntry { get; set; }
         public int sizeOfLocalVars { get; set; }
-        public List<string> methodNames { get; set; }
-        public List<string> varNames { get; set; }
+        public List<string> methodNames { get; set; } = new List<string>();
+        public List<string> varNames { get; set; } = new List<string>();
 
         public static implicit operator Class(TableEntry entry)
         {
-            return new Class()
+            return (entry != null) ? new Class()
             {
                 lexeme = entry.lexeme,
                 token = entry.token,
                 depth = entry.depth
-            };
+            } : new Class();
         }
     }
 
@@ -100,20 +100,20 @@ namespace JavaCompiler
         public string lexeme { get; set; }
         public int depth { get; set; }
         public EntryType typeOfEntry { get; set; }
-        public List<VarType> parameterTypes { get; set; }
-        public List<PassingModes> parameterPassingModes { get; set; }
+        public List<VarType> parameterTypes { get; set; } = new List<VarType>();
+        public List<PassingModes> parameterPassingModes { get; set; } = new List<PassingModes>();
         public int sizeOfLocalVars { get; set; }
         public int numOfParameters { get; set; }
         public VarType returnType { get; set; }
 
         public static implicit operator Method(TableEntry entry)
         {
-            return new Method()
+            return (entry != null) ? new Method()
             {
                 lexeme = entry.lexeme,
                 token = entry.token,
                 depth = entry.depth
-            };
+            } : new Method();
         }
     }
 }

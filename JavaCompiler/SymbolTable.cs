@@ -6,7 +6,7 @@ namespace JavaCompiler
     public enum VarType { intType, booleanType, floatType, voidType }
     public enum ConstType { intType, floatType }
     public enum PassingModes { passByValue, passByRef }
-    public enum EntryType { varEntry, constEntry, methodEntry, classEntry }
+    public enum EntryType { tableEntry, varEntry, constEntry, methodEntry, classEntry }
 
     public class SymbolTable
     {
@@ -26,7 +26,12 @@ namespace JavaCompiler
         public void Upsert(ITableEntry entry)
         {
             uint hash = Hash(entry.lexeme);
-            ITableEntry existingEntry = (symbolTable[hash].Count > 0) ? symbolTable[hash][0] : null;
+            ITableEntry existingEntry = null;
+
+            if (symbolTable[hash].Count > 0 && symbolTable[hash][0].typeOfEntry == EntryType.tableEntry)
+            {
+                existingEntry = symbolTable[hash][0];
+            }
 
             if (existingEntry != null)
             {
@@ -42,16 +47,16 @@ namespace JavaCompiler
         {
             uint hash = Hash(lexeme);
 
-            return (symbolTable[hash].Count > 0) ? symbolTable[Hash(lexeme)][0] : null;
+            return (symbolTable[hash].Count > 0) ? symbolTable[hash][0] : null;
         }
         
         public void DeleteDepth(int depth)
         {
             foreach (List<ITableEntry> entries in symbolTable)
             {
-                if (entries.Count > depth)
+                if (entries.Count > 0)
                 {
-                    entries.RemoveAt(depth);
+                    entries.RemoveAll(entry => entry.depth == depth);
                 }
             }
         }
@@ -76,15 +81,23 @@ namespace JavaCompiler
 
         public void Display(int depth)
         {
-            Console.WriteLine("Entry Lexemes:");
+            Console.WriteLine($"Lexemes entered at depth {depth}:");
 
             foreach (List<ITableEntry> entries in symbolTable)
             {
                 if (entries.Count > depth)
                 {
-                    Console.WriteLine(entries[depth].lexeme);
+                    foreach (ITableEntry entry in entries)
+                    {
+                        if (entry.depth == depth)
+                        {
+                            Console.WriteLine(entry.lexeme + " " + entry.typeOfEntry);
+                        }
+                    }
                 }
             }
+
+            Console.WriteLine("");
         }
     }
 }

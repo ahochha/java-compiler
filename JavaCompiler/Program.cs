@@ -26,6 +26,46 @@ namespace JavaCompiler
             symbolTable.Upsert(variable);
             symbolTable.Display(0);
 
+            TableEntry entry2 = new TableEntry("testing", Tokens.IdT, 1);
+            symbolTable.Upsert(entry2);
+            Variable variable2 = symbolTable.Lookup("testing") as TableEntry;
+            variable2.typeOfEntry = EntryType.varEntry;
+            variable2.varType = VarType.floatType;
+            variable2.offset = 6;
+            variable2.size = 10;
+            symbolTable.Upsert(variable2);
+            symbolTable.Display(1);
+
+            TableEntry entry3 = new TableEntry("testing", Tokens.IdT, 2);
+            symbolTable.Upsert(entry3);
+            Method method = symbolTable.Lookup("testing") as TableEntry;
+            method.typeOfEntry = EntryType.methodEntry;
+            method.numOfParameters = 1;
+            method.parameterPassingModes.Add(PassingModes.passByValue);
+            method.returnType = VarType.voidType;
+            symbolTable.Upsert(method);
+            symbolTable.Display(2);
+
+            TableEntry entry4 = new TableEntry("another test", Tokens.IdT, 0);
+            symbolTable.Upsert(entry4);
+            Constant<int> constant = symbolTable.Lookup("another test") as TableEntry;
+            constant.typeOfEntry = EntryType.constEntry;
+            constant.value = 5;
+            constant.offset = 12;
+            symbolTable.Upsert(constant);
+            symbolTable.Display(0);
+
+            TableEntry entry5 = new TableEntry("testingClassEntry", Tokens.IdT, 0);
+            symbolTable.Upsert(entry5);
+            Class classEntry = symbolTable.Lookup("testingClassEntry") as TableEntry;
+            classEntry.typeOfEntry = EntryType.classEntry;
+            classEntry.sizeOfLocalVars = 5;
+            classEntry.methodNames.Add("func1");
+            symbolTable.Upsert(classEntry);
+            symbolTable.Display(0);
+
+            Console.WriteLine(symbolTable.symbolTable[30].Count);
+
             //try
             //{
             //    JavaFile.ReadLines($@"{Environment.CurrentDirectory}\\" + args[0]);
