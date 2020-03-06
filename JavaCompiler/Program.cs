@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using static JavaCompiler.Resources;
 
 //Name: AUSTIN HOCHHALTER
@@ -55,16 +54,30 @@ namespace JavaCompiler
             symbolTable.Upsert(constant);
             symbolTable.Display(0);
 
-            TableEntry entry5 = new TableEntry("testingClassEntry", Tokens.IdT, 0);
+            TableEntry entry5 = new TableEntry("testing class", Tokens.IdT, 0);
             symbolTable.Upsert(entry5);
-            Class classEntry = symbolTable.Lookup("testingClassEntry") as TableEntry;
+            Class classEntry = symbolTable.Lookup("testing class") as TableEntry;
             classEntry.typeOfEntry = EntryType.classEntry;
             classEntry.sizeOfLocalVars = 5;
             classEntry.methodNames.Add("func1");
             symbolTable.Upsert(classEntry);
             symbolTable.Display(0);
 
-            Console.WriteLine(symbolTable.symbolTable[30].Count);
+            ITableEntry entry6 = symbolTable.Lookup("testing");
+            Method method2 = null;
+
+            if (entry6.typeOfEntry == EntryType.methodEntry)
+            {
+                method2 = entry6 as Method;
+            }
+
+            Console.WriteLine("Testing method field: expected value = 1, returned " + method2.numOfParameters);
+            Console.WriteLine("Testing list size: expected value = 3, returned " + symbolTable.symbolTable[30].Count);
+            Console.WriteLine("");
+
+            symbolTable.Display(1);
+            symbolTable.DeleteDepth(1);
+            symbolTable.Display(1);
 
             //try
             //{

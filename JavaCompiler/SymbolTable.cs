@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace JavaCompiler
 {
@@ -23,6 +24,11 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// Updates/Inserts into the symbol table. Updates the TableEntry to either Variable, Constant,
+        /// Method, or Class if the type of the found lexeme is TableEntry. Otherwise, the entry of
+        /// type TableEntry is inserted to the front of the list at the calculated hash.
+        /// </summary>
         public void Upsert(ITableEntry entry)
         {
             uint hash = Hash(entry.lexeme);
@@ -43,13 +49,25 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// Returns the table entry at the nearest depth that matches the given lexeme.
+        /// </summary>
         public ITableEntry Lookup(string lexeme)
         {
             uint hash = Hash(lexeme);
+            ITableEntry existingEntry = symbolTable[hash].FirstOrDefault(entry => entry.lexeme == lexeme);
 
-            return (symbolTable[hash].Count > 0) ? symbolTable[hash][0] : null;
+            if (existingEntry == null)
+            {
+                ErrorHandler.LogError($"identifier \"{lexeme}\" doesn't exist");
+            }
+
+            return existingEntry;
         }
         
+        /// <summary>
+        /// Deletes all entries at the given depth.
+        /// </summary>
         public void DeleteDepth(int depth)
         {
             foreach (List<ITableEntry> entries in symbolTable)
@@ -61,6 +79,9 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// Returns the hashed value of the given lexeme.
+        /// </summary>
         private uint Hash(string lexeme)
         {
             uint hash = 0, g;
@@ -79,20 +100,20 @@ namespace JavaCompiler
             return hash % tableSize;
         }
 
+        /// <summary>
+        /// Displays the lexemes stored in the table at the given depth.
+        /// </summary>
         public void Display(int depth)
         {
             Console.WriteLine($"Lexemes entered at depth {depth}:");
 
             foreach (List<ITableEntry> entries in symbolTable)
             {
-                if (entries.Count > depth)
+                foreach (ITableEntry entry in entries)
                 {
-                    foreach (ITableEntry entry in entries)
+                    if (entry.depth == depth)
                     {
-                        if (entry.depth == depth)
-                        {
-                            Console.WriteLine(entry.lexeme + " " + entry.typeOfEntry);
-                        }
+                        Console.WriteLine(entry.lexeme + " " + entry.typeOfEntry);
                     }
                 }
             }

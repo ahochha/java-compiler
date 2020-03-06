@@ -3,6 +3,9 @@ using static JavaCompiler.Resources;
 
 namespace JavaCompiler
 {
+    /// <summary>
+    /// Interface used to define table entry types.
+    /// </summary>
     public interface ITableEntry
     {
         public Tokens token { get; set; }
@@ -11,11 +14,17 @@ namespace JavaCompiler
         public EntryType typeOfEntry { get; set; }
     }
 
+    /// <summary>
+    /// Interface used to declare a constant as int or float.
+    /// </summary>
     public interface IValue<ValueT>
     {
         public ValueT value { get; set; }
     }
 
+    /// <summary>
+    /// Implements ITableEntry. Only contains generic table entry fields.
+    /// </summary>
     public class TableEntry : ITableEntry
     {
         public Tokens token { get; set; }
@@ -31,6 +40,9 @@ namespace JavaCompiler
         }
     }
 
+    /// <summary>
+    /// Implements ITableEntry. Also contains variable specific fields.
+    /// </summary>
     public class Variable : ITableEntry
     {
         public Tokens token { get; set; }
@@ -48,10 +60,19 @@ namespace JavaCompiler
                 lexeme = entry.lexeme,
                 token = entry.token,
                 depth = entry.depth
-            } : new Variable();
+            } 
+            : new Variable()
+            {
+                lexeme = "",
+                token = Tokens.UnknownT,
+                depth = 0
+            };
         }
     }
 
+    /// <summary>
+    /// Implements ITableEntry and IValue. Also contains constant specific fields.
+    /// </summary>
     public class Constant<ValueT> : ITableEntry, IValue<ValueT>
     {
         public Tokens token { get; set; }
@@ -69,10 +90,19 @@ namespace JavaCompiler
                 lexeme = entry.lexeme,
                 token = entry.token,
                 depth = entry.depth
-            } : new Constant<ValueT>();
+            }
+            : new Constant<ValueT>()
+            {
+                lexeme = "",
+                token = Tokens.UnknownT,
+                depth = 0
+            };
         }
     }
 
+    /// <summary>
+    /// Implements ITableEntry. Also contains class specific fields.
+    /// </summary>
     public class Class : ITableEntry
     {
         public Tokens token { get; set; }
@@ -90,10 +120,19 @@ namespace JavaCompiler
                 lexeme = entry.lexeme,
                 token = entry.token,
                 depth = entry.depth
-            } : new Class();
+            } 
+            : new Class()
+            {
+                lexeme = "",
+                token = Tokens.UnknownT,
+                depth = 0
+            };
         }
     }
 
+    /// <summary>
+    /// Implements ITableEntry. Also contains method specific fields.
+    /// </summary>
     public class Method : ITableEntry
     {
         public Tokens token { get; set; }
@@ -113,7 +152,13 @@ namespace JavaCompiler
                 lexeme = entry.lexeme,
                 token = entry.token,
                 depth = entry.depth
-            } : new Method();
+            }
+            : new Method()
+            {
+                lexeme = "",
+                token = Tokens.UnknownT,
+                depth = 0
+            };
         }
     }
 }
