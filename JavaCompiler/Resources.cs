@@ -9,8 +9,8 @@ namespace JavaCompiler
         public static List<string> KeyWords = new List<string>()
         {
             "final", "class", "public", "static", "void", "main",
-            "String", "extends", "return", "int", "boolean", "float", 
-            "if", "else", "while", "System.out.println", "length", 
+            "String", "extends", "return", "int", "boolean", "float",
+            "if", "else", "while", "System.out.println", "length",
             "true", "false", "this", "new"
         };
 
@@ -18,8 +18,8 @@ namespace JavaCompiler
         public enum Tokens
         {
             FinalT, ClassT, PublicT, StaticT, VoidT, MainT,
-            StringT, ExtendsT, ReturnT, IntT, BooleanT, FloatT, IfT, 
-            ElseT, WhileT, PrintT, LengthT, TrueT, FalseT, ThisT, 
+            StringT, ExtendsT, ReturnT, IntT, BooleanT, FloatT, IfT,
+            ElseT, WhileT, PrintT, LengthT, TrueT, FalseT, ThisT,
             NewT, LParenT, RParenT, LBrackT, RBrackT, LBraceT, RBraceT,
             CommaT, SemiT, PeriodT, IdT, NumT, LiteralT, QuoteT,
             AssignOpT, AddOpT, MulOpT, RelOpT, EofT, UnknownT
@@ -28,7 +28,7 @@ namespace JavaCompiler
         // Data types supported
         public static List<Tokens> Types = new List<Tokens>
         {
-            Tokens.IntT, Tokens.BooleanT, Tokens.VoidT
+            Tokens.IntT, Tokens.FloatT, Tokens.BooleanT, Tokens.VoidT
         };
 
         // Tokens that are operators
@@ -49,11 +49,32 @@ namespace JavaCompiler
         public static Regex oneLineCommentEndRegex = new Regex(@"\n[^\r|\n]");
         public static Regex multiLineCommentEndRegex = new Regex(@"\*/");
 
+        // General
         public static Tokens Token { get; set; }
         public static string Lexeme { get; set; }
         public static string Literal { get; set; }
         public static char CurrentChar { get; set; }
+        public static int Depth { get; set; }
+        public static int Offset { get; set; }
+        public static int LocalVarsSize { get; set; }
+
+        // Variable
+        public static VarType TypeVar { get; set; }
+        public static int Size { get; set; }
+
+        // Constant
+        public static ConstType TypeConst { get; set; }
         public static int Value { get; set; }
-        public static double ValueR { get; set; }
+        public static float ValueR { get; set; }
+
+        // Class
+        public static List<string> MethodNames { get; set; } = new List<string>();
+        public static List<string> VarNames { get; set; } = new List<string>();
+
+        // Method
+        public static List<VarType> ParameterTypes { get; set; } = new List<VarType>();
+        public static List<PassingModes> ParameterPassingModes { get; set; } = new List<PassingModes>();
+        public static int ParameterNum { get; set; }
+        public static VarType TypeReturn { get; set; }
     }
 }

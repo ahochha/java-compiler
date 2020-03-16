@@ -5,10 +5,13 @@ namespace JavaCompiler
     public class Parser
     {
         private LexicalAnalyzer lexicalAnalyzer { get; set; }
+        public SymbolTable symbolTable { get; set; }
 
         public Parser()
         {
             lexicalAnalyzer = new LexicalAnalyzer();
+            symbolTable = new SymbolTable();
+
             lexicalAnalyzer.GetNextToken();
         }
 
@@ -114,8 +117,15 @@ namespace JavaCompiler
             {
                 Match(Tokens.FinalT);
                 Type();
+
+                TableEntry entry = new TableEntry(Lexeme, Token, Depth);
+                symbolTable.InsertEntry(entry);
+
                 Match(Tokens.IdT);
                 Match(Tokens.AssignOpT);
+
+                symbolTable.ConvertEntryToConstant(entry);
+
                 Match(Tokens.NumT);
                 Match(Tokens.SemiT);
                 VarDecl();
@@ -123,12 +133,6 @@ namespace JavaCompiler
             else if (Types.Contains(Token))
             {
                 Type();
-
-                if (Token == Tokens.SemiT)
-                {
-                    ErrorHandler.LogError($"expected an identifier, found \"{Lexeme}\"");
-                }
-
                 IdentifierList();
                 Match(Tokens.SemiT);
                 VarDecl();
@@ -140,13 +144,33 @@ namespace JavaCompiler
         }
 
         /// <summary>
-        /// Type -> IntT | BooleanT | VoidT
+        /// Type -> IntT | FloatT | BooleanT | VoidT
         /// </summary>
         private void Type()
         {
-            if (Types.Contains(Token))
+            if (Token == Tokens.IntT)
             {
-                Match(Types.Find(t => t == Token));
+                TypeVar = VarType.intType;
+                Size = 2;
+                Match(Tokens.IntT);
+            }
+            else if (Token == Tokens.FloatT)
+            {
+                TypeVar = VarType.floatType;
+                Size = 4;
+                Match(Tokens.FloatT);
+            }
+            else if (Token == Tokens.BooleanT)
+            {
+                TypeVar = VarType.booleanType;
+                Size = 1;
+                Match(Tokens.BooleanT);
+            }
+            else if (Token == Tokens.VoidT)
+            {
+                TypeVar = VarType.voidType;
+                Size = 0;
+                Match(Tokens.VoidT);
             }
             else
             {
@@ -155,18 +179,38 @@ namespace JavaCompiler
         }
 
         /// <summary>
-        /// IdentifierList -> IdT | IdentifierList , IdT
+        /// IdentifierList -> IdT IdentifierListTail
         /// </summary>
         private void IdentifierList()
         {
             if (Token == Tokens.IdT)
             {
+                TableEntry entry = new TableEntry(Lexeme, Token, Depth);
+                symbolTable.InsertEntry(entry);
+                symbolTable.ConvertEntryToVariable(entry);
+
                 Match(Tokens.IdT);
-                IdentifierList();
+                IdentifierListTail();
             }
-            else if (Token == Tokens.CommaT)
+            else
+            {
+                ErrorHandler.LogError($"expected an identifier, found \"{Lexeme}\"");
+            }
+        }
+
+        /// <summary>
+        /// IdentifierListTail -> , IdT IdentifierListTail | ε
+        /// </summary>
+        private void IdentifierListTail()
+        {
+            if (Token == Tokens.CommaT)
             {
                 Match(Tokens.CommaT);
+
+                TableEntry entry = new TableEntry(Lexeme, Token, Depth);
+                symbolTable.InsertEntry(entry);
+                symbolTable.ConvertEntryToVariable(entry);
+
                 Match(Tokens.IdT);
 
                 if (Token == Tokens.IdT)
@@ -174,7 +218,7 @@ namespace JavaCompiler
                     ErrorHandler.LogError("expected \",\" before next identifier");
                 }
 
-                IdentifierList();
+                IdentifierListTail();
             }
         }
 

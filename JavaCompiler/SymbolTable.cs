@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using static JavaCompiler.Resources;
 
 namespace JavaCompiler
 {
@@ -26,7 +27,7 @@ namespace JavaCompiler
 
         /// <summary>
         /// Updates/Inserts into the symbol table. Updates the TableEntry to either Variable, Constant,
-        /// Method, or Class if the type of the found lexeme is TableEntry. Otherwise, the entry of
+        /// Method, or Class if the depth matches the global depth at the found hash. Otherwise, the entry of
         /// type TableEntry is inserted to the front of the list at the calculated hash.
         /// </summary>
         public void Upsert(ITableEntry entry)
@@ -34,7 +35,7 @@ namespace JavaCompiler
             uint hash = Hash(entry.lexeme);
             ITableEntry existingEntry = null;
 
-            if (symbolTable[hash].Count > 0 && symbolTable[hash][0].typeOfEntry == EntryType.tableEntry)
+            if (symbolTable[hash].Count > 0 && symbolTable[hash][0].depth == Depth)
             {
                 existingEntry = symbolTable[hash][0];
             }
@@ -50,19 +51,108 @@ namespace JavaCompiler
         }
 
         /// <summary>
+        /// Inserts basic table entry into the symbol table.
+        /// </summary>
+        public void InsertEntry(TableEntry entry)
+        {
+            CheckForDuplicates();
+            Upsert(entry);
+        }
+
+        /// <summary>
+        /// Converts the entry to a variable.
+        /// </summary>
+        public void ConvertEntryToVariable(ITableEntry entry)
+        {
+            Variable varEntry = entry as Variable;
+
+            varEntry.typeOfEntry = EntryType.varEntry;
+            varEntry.offset = Offset;
+            varEntry.varType = TypeVar;
+            varEntry.size = Size;
+
+            Upsert(varEntry);
+        }
+
+        /// <summary>
+        /// Converts the entry to a constant.
+        /// </summary>
+        public void ConvertEntryToConstant(ITableEntry entry)
+        {
+            if (Lexeme.Contains("."))
+            {
+                Constant<float> constEntry = entry as Constant<float>;
+
+                constEntry.typeOfEntry = EntryType.constEntry;
+                constEntry.offset = Offset;
+                constEntry.constType = ConstType.floatType;
+                constEntry.value = ValueR;
+
+                Upsert(constEntry);
+            }
+            else
+            {
+                Constant<int> constEntry = entry as Constant<int>;
+
+                constEntry.typeOfEntry = EntryType.constEntry;
+                constEntry.offset = Offset;
+                constEntry.constType = ConstType.intType;
+                constEntry.value = Value;
+
+                Upsert(constEntry);
+            }
+        }
+
+        /// <summary>
+        /// Converts the entry to a class.
+        /// </summary>
+        public void ConvertEntryToClass(ITableEntry entry)
+        {
+            Class classEntry = entry as Class;
+
+            classEntry.typeOfEntry = EntryType.classEntry;
+            classEntry.sizeOfLocalVars = LocalVarsSize;
+            classEntry.varNames = VarNames;
+            classEntry.methodNames = MethodNames;
+
+            Upsert(classEntry);
+        }
+
+        /// <summary>
+        /// Converts the entry to a method.
+        /// </summary>
+        public void ConvertEntryToMethod(ITableEntry entry)
+        {
+            Method methodEntry = entry as Method;
+
+            methodEntry.typeOfEntry = EntryType.methodEntry;
+            methodEntry.sizeOfLocalVars = LocalVarsSize;
+            methodEntry.numOfParameters = ParameterNum;
+            methodEntry.parameterPassingModes = ParameterPassingModes;
+            methodEntry.parameterTypes = ParameterTypes;
+
+            Upsert(methodEntry);
+        }
+
+        /// <summary>
         /// Returns the table entry at the nearest depth that matches the given lexeme.
         /// </summary>
         public ITableEntry Lookup(string lexeme)
         {
-            uint hash = Hash(lexeme);
-            ITableEntry existingEntry = symbolTable[hash].FirstOrDefault(entry => entry.lexeme == lexeme);
+            return symbolTable[Hash(lexeme)].FirstOrDefault(entry => entry.lexeme == lexeme);
+        }
 
-            if (existingEntry == null)
+        /// <summary>
+        /// Checks symbol table to verify that the given identifier is not a duplicate.
+        /// </summary>
+        public void CheckForDuplicates()
+        {
+            ITableEntry entry = Lookup(Lexeme);
+
+            if (entry != null && entry.typeOfEntry != EntryType.tableEntry && entry.depth == Depth)
             {
-                ErrorHandler.LogError($"identifier \"{lexeme}\" doesn't exist");
+                ErrorHandler.LogError($"duplicate identifier {Lexeme} found");
             }
-
-            return existingEntry;
         }
         
         /// <summary>
