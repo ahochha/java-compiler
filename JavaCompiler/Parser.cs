@@ -51,7 +51,6 @@ namespace JavaCompiler
             {
                 ClassDecl();
                 symbolTable.Display(Depth);
-                symbolTable.DeleteDepth(Depth);
                 MoreClasses();
             }
             else if (Token == Tokens.IdT)
