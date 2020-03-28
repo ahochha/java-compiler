@@ -107,7 +107,6 @@ namespace JavaCompiler
         {
             LoadLexeme(decimalDigitRegex);
             Token = (numberRegex.IsMatch(Lexeme)) ? Tokens.NumT : Tokens.UnknownT;
-            SetNumValue();
         }
 
         /// <summary>
@@ -212,25 +211,6 @@ namespace JavaCompiler
             {
                 JavaFile.GetNextChar();
                 Lexeme += CurrentChar;
-            }
-        }
-
-        /// <summary>
-        /// Sets the global variable ValueR/Value based on the read number.
-        /// </summary>
-        public void SetNumValue()
-        {
-            float floatVal;
-            int intVal;
-
-            if (int.TryParse(Lexeme, out intVal))
-            {
-                Value = intVal;
-
-            }
-            else if (float.TryParse(Lexeme, out floatVal))
-            {
-                ValueR = floatVal;
             }
         }
     }

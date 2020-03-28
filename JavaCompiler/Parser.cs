@@ -1,4 +1,5 @@
-﻿using static JavaCompiler.Resources;
+﻿using System.Collections.Generic;
+using static JavaCompiler.Resources;
 
 namespace JavaCompiler
 {
@@ -37,6 +38,8 @@ namespace JavaCompiler
         {
             MoreClasses();
             MainClass();
+            symbolTable.Display(Depth);
+            symbolTable.DeleteDepth(Depth);
         }
 
         /// <summary>
@@ -47,6 +50,8 @@ namespace JavaCompiler
             if (Token == Tokens.ClassT)
             {
                 ClassDecl();
+                symbolTable.Display(Depth);
+                symbolTable.DeleteDepth(Depth);
                 MoreClasses();
             }
             else if (Token == Tokens.IdT)
@@ -66,12 +71,20 @@ namespace JavaCompiler
         {
             Match(Tokens.FinalT);
             Match(Tokens.ClassT);
+            TableEntry finalClassEntry = symbolTable.CreateTableEntry();
             Match(Tokens.IdT);
+            Depth++;
+            ResetClassGlobals();
             Match(Tokens.LBraceT);
             Match(Tokens.PublicT);
             Match(Tokens.StaticT);
             Match(Tokens.VoidT);
+            TypeReturn = VarType.voidType;
+            TableEntry mainEntry = symbolTable.CreateTableEntry();
+            MethodNames.Add(Lexeme);
             Match(Tokens.MainT);
+            Depth++;
+            ResetMethodGlobals();
             Match(Tokens.LParenT);
             Match(Tokens.StringT);
             Match(Tokens.LBrackT);
@@ -80,7 +93,15 @@ namespace JavaCompiler
             Match(Tokens.RParenT);
             Match(Tokens.LBraceT);
             SeqOfStatements();
+            symbolTable.ConvertEntryToMethod(mainEntry);
+            symbolTable.Display(Depth);
+            symbolTable.DeleteDepth(Depth);
+            Depth--;
             Match(Tokens.RBraceT);
+            symbolTable.ConvertEntryToClass(finalClassEntry);
+            symbolTable.Display(Depth);
+            symbolTable.DeleteDepth(Depth);
+            Depth--;
             Match(Tokens.RBraceT);
         }
 
@@ -91,7 +112,11 @@ namespace JavaCompiler
         /// </summary>
         private void ClassDecl()
         {
+            int tempLocalVarsSize;
+            List<string> tempVarNames = new List<string>();
+
             Match(Tokens.ClassT);
+            TableEntry entry = symbolTable.CreateTableEntry();
             Match(Tokens.IdT);
 
             if (Token == Tokens.ExtendsT)
@@ -100,9 +125,19 @@ namespace JavaCompiler
                 Match(Tokens.IdT);
             }
 
+            Depth++;
+            ResetClassGlobals();
             Match(Tokens.LBraceT);
             VarDecl();
+            tempLocalVarsSize = LocalVarsSize;
+            tempVarNames = VarNames;
             MethodDecl();
+            LocalVarsSize = tempLocalVarsSize;
+            VarNames = tempVarNames;
+            symbolTable.ConvertEntryToClass(entry);
+            symbolTable.Display(Depth);
+            symbolTable.DeleteDepth(Depth);
+            Depth--;
             Match(Tokens.RBraceT);
         }
 
@@ -117,16 +152,14 @@ namespace JavaCompiler
             {
                 Match(Tokens.FinalT);
                 Type();
-
-                TableEntry entry = new TableEntry(Lexeme, Token, Depth);
-                symbolTable.InsertEntry(entry);
-
+                TableEntry entry = symbolTable.CreateTableEntry();
+                VarNames.Add(Lexeme);
                 Match(Tokens.IdT);
                 Match(Tokens.AssignOpT);
-
                 symbolTable.ConvertEntryToConstant(entry);
-
                 Match(Tokens.NumT);
+                LocalVarsSize += Size;
+                Offset += Size;
                 Match(Tokens.SemiT);
                 VarDecl();
             }
@@ -151,12 +184,14 @@ namespace JavaCompiler
             if (Token == Tokens.IntT)
             {
                 TypeVar = VarType.intType;
+                TypeConst = ConstType.intType;
                 Size = 2;
                 Match(Tokens.IntT);
             }
             else if (Token == Tokens.FloatT)
             {
                 TypeVar = VarType.floatType;
+                TypeConst = ConstType.floatType;
                 Size = 4;
                 Match(Tokens.FloatT);
             }
@@ -185,10 +220,11 @@ namespace JavaCompiler
         {
             if (Token == Tokens.IdT)
             {
-                TableEntry entry = new TableEntry(Lexeme, Token, Depth);
-                symbolTable.InsertEntry(entry);
+                TableEntry entry = symbolTable.CreateTableEntry();
                 symbolTable.ConvertEntryToVariable(entry);
-
+                VarNames.Add(Lexeme);
+                LocalVarsSize += Size;
+                Offset += Size;
                 Match(Tokens.IdT);
                 IdentifierListTail();
             }
@@ -206,11 +242,11 @@ namespace JavaCompiler
             if (Token == Tokens.CommaT)
             {
                 Match(Tokens.CommaT);
-
-                TableEntry entry = new TableEntry(Lexeme, Token, Depth);
-                symbolTable.InsertEntry(entry);
+                TableEntry entry = symbolTable.CreateTableEntry();
                 symbolTable.ConvertEntryToVariable(entry);
-
+                VarNames.Add(Lexeme);
+                LocalVarsSize += Size;
+                Offset += Size;
                 Match(Tokens.IdT);
 
                 if (Token == Tokens.IdT)
@@ -234,7 +270,12 @@ namespace JavaCompiler
             {
                 Match(Tokens.PublicT);
                 Type();
+                TypeReturn = TypeVar;
+                TableEntry entry = symbolTable.CreateTableEntry();
+                MethodNames.Add(Lexeme);
                 Match(Tokens.IdT);
+                Depth++;
+                ResetMethodGlobals();
                 Match(Tokens.LParenT);
                 FormalList();
                 Match(Tokens.RParenT);
@@ -244,6 +285,10 @@ namespace JavaCompiler
                 Match(Tokens.ReturnT);
                 Expr();
                 Match(Tokens.SemiT);
+                symbolTable.ConvertEntryToMethod(entry);
+                symbolTable.Display(Depth);
+                symbolTable.DeleteDepth(Depth);
+                Depth--;
                 Match(Tokens.RBraceT);
                 MethodDecl();
             }
@@ -257,6 +302,12 @@ namespace JavaCompiler
             if (Types.Contains(Token))
             {
                 Type();
+                TableEntry entry = symbolTable.CreateTableEntry();
+                symbolTable.ConvertEntryToVariable(entry);
+                ParameterTypes.Add(TypeVar);
+                ParameterNum++;
+                ParameterVarsSize += Size;
+                Offset += Size;
                 Match(Tokens.IdT);
                 FormalRest();
                 FormalList();
@@ -276,6 +327,12 @@ namespace JavaCompiler
             {
                 Match(Tokens.CommaT);
                 Type();
+                TableEntry entry = symbolTable.CreateTableEntry();
+                symbolTable.ConvertEntryToVariable(entry);
+                ParameterTypes.Add(TypeVar);
+                ParameterNum++;
+                ParameterVarsSize += Size;
+                Offset += Size;
                 Match(Tokens.IdT);
                 FormalRest();
             }

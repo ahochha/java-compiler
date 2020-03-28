@@ -33,6 +33,7 @@ namespace JavaCompiler
             if ((int)desired < KeyWords.Count) { expected = "\"" + KeyWords[(int)desired] + "\""; }
             else if (OperatorTokens.Contains(desired)) { expected = "an operator"; }
             else if (desired == Tokens.IdT)     { expected = "an identifier"; }
+            else if (desired == Tokens.NumT)    { expected = "a number"; }
             else if (desired == Tokens.LParenT) { expected = "\"(\""; }
             else if (desired == Tokens.RParenT) { expected = "\")\""; }
             else if (desired == Tokens.LBrackT) { expected = "\"[\""; }

@@ -73,8 +73,32 @@ namespace JavaCompiler
 
         // Method
         public static List<VarType> ParameterTypes { get; set; } = new List<VarType>();
-        public static List<PassingModes> ParameterPassingModes { get; set; } = new List<PassingModes>();
+        public static int ParameterVarsSize { get; set; }
         public static int ParameterNum { get; set; }
         public static VarType TypeReturn { get; set; }
+
+        /// <summary>
+        /// Clears method entry globals after entering a new method.
+        /// </summary>
+        public static void ResetMethodGlobals()
+        {
+            Offset = 0;
+            LocalVarsSize = 0;
+            ParameterTypes = new List<VarType>();
+            ParameterVarsSize = 0;
+            VarNames = new List<string>();
+            ParameterNum = 0;
+        }
+
+        /// <summary>
+        /// Clears class entry globals after entering a new class.
+        /// </summary>
+        public static void ResetClassGlobals()
+        {
+            Offset = 0;
+            LocalVarsSize = 0;
+            MethodNames = new List<string>();
+            VarNames = new List<string>();
+        }
     }
 }

@@ -33,16 +33,12 @@ namespace JavaCompiler
         public void Upsert(ITableEntry entry)
         {
             uint hash = Hash(entry.lexeme);
-            ITableEntry existingEntry = null;
 
-            if (symbolTable[hash].Count > 0 && symbolTable[hash][0].depth == Depth)
+            if (entry.typeOfEntry != EntryType.tableEntry)
             {
-                existingEntry = symbolTable[hash][0];
-            }
-
-            if (existingEntry != null)
-            {
-                symbolTable[hash][0] = entry;
+                List<ITableEntry> entriesAtHash = symbolTable[hash];
+                int index = entriesAtHash.FindIndex(tableEntry => tableEntry.lexeme == entry.lexeme && tableEntry.depth == entry.depth);
+                symbolTable[hash][index] = entry;
             }
             else
             {
@@ -60,11 +56,22 @@ namespace JavaCompiler
         }
 
         /// <summary>
+        /// Creates a new table entry using the global Lexeme, Token, and Depth variables.
+        /// </summary>
+        public TableEntry CreateTableEntry()
+        {
+            TableEntry entry = new TableEntry(Lexeme, Token, Depth);
+            InsertEntry(entry);
+
+            return entry;
+        }
+
+        /// <summary>
         /// Converts the entry to a variable.
         /// </summary>
         public void ConvertEntryToVariable(ITableEntry entry)
         {
-            Variable varEntry = entry as Variable;
+            Variable varEntry = entry as TableEntry;
 
             varEntry.typeOfEntry = EntryType.varEntry;
             varEntry.offset = Offset;
@@ -75,40 +82,11 @@ namespace JavaCompiler
         }
 
         /// <summary>
-        /// Converts the entry to a constant.
-        /// </summary>
-        public void ConvertEntryToConstant(ITableEntry entry)
-        {
-            if (Lexeme.Contains("."))
-            {
-                Constant<float> constEntry = entry as Constant<float>;
-
-                constEntry.typeOfEntry = EntryType.constEntry;
-                constEntry.offset = Offset;
-                constEntry.constType = ConstType.floatType;
-                constEntry.value = ValueR;
-
-                Upsert(constEntry);
-            }
-            else
-            {
-                Constant<int> constEntry = entry as Constant<int>;
-
-                constEntry.typeOfEntry = EntryType.constEntry;
-                constEntry.offset = Offset;
-                constEntry.constType = ConstType.intType;
-                constEntry.value = Value;
-
-                Upsert(constEntry);
-            }
-        }
-
-        /// <summary>
         /// Converts the entry to a class.
         /// </summary>
         public void ConvertEntryToClass(ITableEntry entry)
         {
-            Class classEntry = entry as Class;
+            Class classEntry = entry as TableEntry;
 
             classEntry.typeOfEntry = EntryType.classEntry;
             classEntry.sizeOfLocalVars = LocalVarsSize;
@@ -123,15 +101,81 @@ namespace JavaCompiler
         /// </summary>
         public void ConvertEntryToMethod(ITableEntry entry)
         {
-            Method methodEntry = entry as Method;
+            Method methodEntry = entry as TableEntry;
 
             methodEntry.typeOfEntry = EntryType.methodEntry;
+            methodEntry.returnType = TypeReturn;
             methodEntry.sizeOfLocalVars = LocalVarsSize;
             methodEntry.numOfParameters = ParameterNum;
-            methodEntry.parameterPassingModes = ParameterPassingModes;
+            methodEntry.sizeOfParameterVars = ParameterVarsSize;
             methodEntry.parameterTypes = ParameterTypes;
 
             Upsert(methodEntry);
+        }
+
+        /// <summary>
+        /// Converts the entry to a constant.
+        /// </summary>
+        public void ConvertEntryToConstant(ITableEntry entry)
+        {
+            GetConstantValue();
+
+            if (TypeConst == ConstType.floatType)
+            {
+                ConvertConstantBasedOnType<float>(entry);
+            }
+            else
+            {
+                ConvertConstantBasedOnType<int>(entry);
+            }
+        }
+
+        /// <summary>
+        /// Gets the constant value the variable is assigned to.
+        /// </summary>
+        public void GetConstantValue()
+        {
+            int value;
+            float valueR;
+
+            if (int.TryParse(Lexeme, out value))
+            {
+                Value = value;
+            }
+            else if (float.TryParse(Lexeme, out valueR))
+            {
+                ValueR = valueR;
+            }
+            else
+            {
+                ErrorHandler.LogError($"{Lexeme} is not a number.");
+            }
+        }
+
+        /// <summary>
+        /// Converts the entry to a constant of type int or float.
+        /// </summary>
+        public void ConvertConstantBasedOnType<ValueT>(ITableEntry entry)
+        {
+            Constant<ValueT> constEntry = entry as TableEntry;
+            dynamic value;
+
+            constEntry.typeOfEntry = EntryType.constEntry;
+            constEntry.constType = TypeConst;
+            constEntry.offset = Offset;
+
+            if (TypeConst == ConstType.floatType)
+            {
+                value = ValueR;
+                constEntry.value = value;
+            }
+            else
+            {
+                value = Value;
+                constEntry.value = value;
+            }
+
+            Upsert(constEntry);
         }
 
         /// <summary>
@@ -149,12 +193,12 @@ namespace JavaCompiler
         {
             ITableEntry entry = Lookup(Lexeme);
 
-            if (entry != null && entry.typeOfEntry != EntryType.tableEntry && entry.depth == Depth)
+            if (entry != null && entry.depth == Depth)
             {
-                ErrorHandler.LogError($"duplicate identifier {Lexeme} found");
+                ErrorHandler.LogError($"duplicate identifier \"{Lexeme}\" found");
             }
         }
-        
+
         /// <summary>
         /// Deletes all entries at the given depth.
         /// </summary>
@@ -196,6 +240,9 @@ namespace JavaCompiler
         public void Display(int depth)
         {
             Console.WriteLine($"Lexemes entered at depth {depth}:");
+            Console.WriteLine("");
+            Console.WriteLine(string.Format("Lexeme            Type of Entry"));
+            Console.WriteLine("-------------------------------");
 
             foreach (List<ITableEntry> entries in symbolTable)
             {
@@ -203,11 +250,12 @@ namespace JavaCompiler
                 {
                     if (entry.depth == depth)
                     {
-                        Console.WriteLine(entry.lexeme + " " + entry.typeOfEntry);
+                        Console.WriteLine(string.Format("{0, -18}{1, -10}", entry.lexeme, entry.typeOfEntry));
                     }
                 }
             }
 
+            Console.WriteLine("");
             Console.WriteLine("");
         }
     }

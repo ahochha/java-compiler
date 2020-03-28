@@ -139,9 +139,9 @@ namespace JavaCompiler
         public string lexeme { get; set; }
         public int depth { get; set; }
         public EntryType typeOfEntry { get; set; }
-        public List<VarType> parameterTypes { get; set; } = new List<VarType>();
-        public List<PassingModes> parameterPassingModes { get; set; } = new List<PassingModes>();
         public int sizeOfLocalVars { get; set; }
+        public List<VarType> parameterTypes { get; set; } = new List<VarType>();
+        public int sizeOfParameterVars { get; set; }
         public int numOfParameters { get; set; }
         public VarType returnType { get; set; }
 
