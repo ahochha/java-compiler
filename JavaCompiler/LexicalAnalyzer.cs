@@ -139,6 +139,7 @@ namespace JavaCompiler
             else if (Lexeme == ";") { Token = Tokens.SemiT; }
             else if (Lexeme == ".") { Token = Tokens.PeriodT; }
             else if (Lexeme == "=") { Token = Tokens.AssignOpT; }
+            else if (Lexeme == "!") { Token = Tokens.NotOpT; }
             else if (Lexeme == "+" || Lexeme == "-") { Token = Tokens.AddOpT; }
             else if (Lexeme == "*" || Lexeme == "/") { Token = Tokens.MulOpT; }
             else if (Lexeme == "<" || Lexeme == ">") { Token = Tokens.RelOpT; }

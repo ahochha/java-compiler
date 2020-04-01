@@ -169,10 +169,6 @@ namespace JavaCompiler
                 Match(Tokens.SemiT);
                 VarDecl();
             }
-            else if (Token == Tokens.IdT)
-            {
-                ErrorHandler.LogError($"expected type declaration, found \"{Lexeme}\"");
-            }
         }
 
         /// <summary>
@@ -342,19 +338,143 @@ namespace JavaCompiler
         }
 
         /// <summary>
-        /// ε
+        /// SeqOfStatements -> Statement ; SeqOfStatements | ε
         /// </summary>
         private void SeqOfStatements()
         {
-            // not yet implemented
+            if (Token == Tokens.IdT)
+            {
+                Statement();
+                Match(Tokens.SemiT);
+                SeqOfStatements();
+            }
         }
 
-        /// <summary>
-        /// ε
-        /// </summary>
+        private void Statement()
+        {
+            AssignStat();
+            //IOStat(); - not yet implemented...
+        }
+
+        private void AssignStat()
+        {
+            ITableEntry entry = symbolTable.Lookup(Lexeme);
+
+            if (entry != null && entry.depth == Depth)
+            {
+                Match(Tokens.IdT);
+                Match(Tokens.AssignOpT);
+                Expr();
+            }
+            else
+            {
+                ErrorHandler.LogError($"\"{Lexeme}\" is undeclared");
+            }
+        }
+
+        private void IOStat()
+        {
+            // not yet implemented...
+        }
+
         private void Expr()
         {
-            // not yet implemented
+            if (FactorTokens.Contains(Token))
+            {
+                Relation();
+            }
+        }
+
+        private void Relation()
+        {
+            SimpleExpr();
+        }
+
+        private void SimpleExpr()
+        {
+            Term();
+            MoreTerm();
+        }
+
+        private void MoreTerm()
+        {
+            if (Token == Tokens.AddOpT)
+            {
+                AddOp();
+                Term();
+                MoreTerm();
+            }
+        }
+
+        private void Term()
+        {
+            Factor();
+            MoreFactor();
+        }
+
+        private void MoreFactor()
+        {
+            if (Token == Tokens.MulOpT)
+            {
+                MulOp();
+                Factor();
+                MoreFactor();
+            }
+        }
+
+        private void Factor()
+        {
+            if (Token == Tokens.IdT)
+            {
+                Match(Tokens.IdT);
+            }
+            else if (Token == Tokens.NumT)
+            {
+                Match(Tokens.NumT);
+            }
+            else if (Token == Tokens.LParenT)
+            {
+                Match(Tokens.LParenT);
+                Expr();
+                Match(Tokens.RParenT);
+            }
+            else if (Token == Tokens.NotOpT)
+            {
+                Match(Tokens.NotOpT);
+                Factor();
+            }
+            else if (Token == Tokens.AddOpT && Lexeme == "-")
+            {
+                SignOp();
+                Factor();
+            }
+            else if (Token == Tokens.TrueT)
+            {
+                Match(Tokens.TrueT);
+            }
+            else if (Token == Tokens.FalseT)
+            {
+                Match(Tokens.FalseT);
+            }
+            else
+            {
+                ErrorHandler.LogError($"expected valid expression, failed at \"{Lexeme}\"");
+            }
+        }
+
+        private void AddOp()
+        {
+            Match(Tokens.AddOpT);
+        }
+
+        private void MulOp()
+        {
+            Match(Tokens.MulOpT);
+        }
+
+        private void SignOp()
+        {
+            Match(Tokens.AddOpT);
         }
     }
 }

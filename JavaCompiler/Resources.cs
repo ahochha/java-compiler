@@ -22,7 +22,7 @@ namespace JavaCompiler
             ElseT, WhileT, PrintT, LengthT, TrueT, FalseT, ThisT,
             NewT, LParenT, RParenT, LBrackT, RBrackT, LBraceT, RBraceT,
             CommaT, SemiT, PeriodT, IdT, NumT, LiteralT, QuoteT,
-            AssignOpT, AddOpT, MulOpT, RelOpT, EofT, UnknownT
+            AssignOpT, NotOpT, AddOpT, MulOpT, RelOpT, EofT, UnknownT
         }
 
         // Data types supported
@@ -34,13 +34,19 @@ namespace JavaCompiler
         // Tokens that are operators
         public static List<Tokens> OperatorTokens = new List<Tokens>()
         {
-            Tokens.AssignOpT, Tokens.RelOpT, Tokens.AddOpT, Tokens.MulOpT
+            Tokens.AssignOpT, Tokens.NotOpT, Tokens.RelOpT, Tokens.AddOpT, Tokens.MulOpT
+        };
+
+        public static List<Tokens> FactorTokens = new List<Tokens>()
+        {
+            Tokens.IdT, Tokens.NumT, Tokens.LParenT, Tokens.NotOpT, Tokens.AddOpT, 
+            Tokens.TrueT, Tokens.FalseT
         };
 
         // Regular expressions used in LexicalAnalyzer
         public static Regex comparisonRegex = new Regex(@"<|>|!|=|&|\|");
         public static Regex lookAheadCharRegex = new Regex(@"=|&|\|");
-        public static Regex specialCharRegex = new Regex(@"\(|\)|\[|\]|\{|\}|,|;|\.|\+|-|\*|/|=|<|>");
+        public static Regex specialCharRegex = new Regex(@"\(|\)|\[|\]|\{|\}|,|;|\.|\+|-|\*|/|=|!|<|>");
         public static Regex commentStartRegex = new Regex(@"^/[/|\*]$");
         public static Regex wordRegex = new Regex(@"\w+");
         public static Regex printRegex = new Regex(@"\.|[a-z]");
