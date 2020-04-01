@@ -350,12 +350,18 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// Statement -> AssignStat | IOStat
+        /// </summary>
         private void Statement()
         {
             AssignStat();
             //IOStat(); - not yet implemented...
         }
 
+        /// <summary>
+        /// AssignStat -> IdT = Expr
+        /// </summary>
         private void AssignStat()
         {
             ITableEntry entry = symbolTable.Lookup(Lexeme);
@@ -372,11 +378,17 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// ε
+        /// </summary>
         private void IOStat()
         {
             // not yet implemented...
         }
 
+        /// <summary>
+        /// Expr -> Relation | ε
+        /// </summary>
         private void Expr()
         {
             if (FactorTokens.Contains(Token))
@@ -385,17 +397,26 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// Relation -> SimpleExpr
+        /// </summary>
         private void Relation()
         {
             SimpleExpr();
         }
 
+        /// <summary>
+        /// SimpleExpr -> Term MoreTerm
+        /// </summary>
         private void SimpleExpr()
         {
             Term();
             MoreTerm();
         }
 
+        /// <summary>
+        /// MoreTerm -> AddOpT Term MoreTerm | ε
+        /// </summary>
         private void MoreTerm()
         {
             if (Token == Tokens.AddOpT)
@@ -406,12 +427,18 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// Term -> Factor MoreFactor
+        /// </summary>
         private void Term()
         {
             Factor();
             MoreFactor();
         }
 
+        /// <summary>
+        /// MoreFactor -> MulOpT Factor MoreFactor | ε
+        /// </summary>
         private void MoreFactor()
         {
             if (Token == Tokens.MulOpT)
@@ -422,6 +449,9 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// Factor - > IdT | NumT | ( Expr ) | ! Factor | SignOp Factor | TrueT | FalseT
+        /// </summary>
         private void Factor()
         {
             if (Token == Tokens.IdT)
@@ -462,16 +492,25 @@ namespace JavaCompiler
             }
         }
 
+        /// <summary>
+        /// AddOp -> + | - | ||
+        /// </summary>
         private void AddOp()
         {
             Match(Tokens.AddOpT);
         }
 
+        /// <summary>
+        /// MulOp -> * | / | &&
+        /// </summary>
         private void MulOp()
         {
             Match(Tokens.MulOpT);
         }
 
+        /// <summary>
+        /// SignOp -> -
+        /// </summary>
         private void SignOp()
         {
             Match(Tokens.AddOpT);
