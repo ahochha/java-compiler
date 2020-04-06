@@ -366,7 +366,7 @@ namespace JavaCompiler
         {
             ITableEntry entry = symbolTable.Lookup(Lexeme);
 
-            if (entry != null && entry.depth == Depth)
+            if (entry != null)
             {
                 Match(Tokens.IdT);
                 Match(Tokens.AssignOpT);
