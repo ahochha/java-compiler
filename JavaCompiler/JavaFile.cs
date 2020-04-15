@@ -6,16 +6,20 @@ namespace JavaCompiler
 {
     public static class JavaFile
     {
+        public static string fileName { get; set; }
         private static StreamReader program {get; set; }
         public static int lineNum { get; set; } = 1;
 
         /// <summary>
-        /// Reads the java program into a StreamReader.
+        /// Reads the java program into a StreamReader. Sets the file name.
         /// </summary>
-        public static void ReadLines(string filePath)
+        public static void ReadLines(string nameOfFile)
         {
+            string filePath = $@"{Environment.CurrentDirectory}\\" + nameOfFile;
+
             try
             {
+                fileName = nameOfFile;
                 program = File.OpenText(filePath);
             }
             catch

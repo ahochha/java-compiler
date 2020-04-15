@@ -55,6 +55,8 @@ namespace JavaCompiler
         public static Regex oneLineCommentEndRegex = new Regex(@"\n[^\r|\n]");
         public static Regex multiLineCommentEndRegex = new Regex(@"\*/");
 
+        // Parser Global Variables
+
         // General
         public static Tokens Token { get; set; }
         public static string Lexeme { get; set; }
@@ -62,6 +64,7 @@ namespace JavaCompiler
         public static char CurrentChar { get; set; }
         public static int Depth { get; set; }
         public static int Offset { get; set; }
+        public static string BpOffsetName { get; set; }
         public static int LocalVarsSize { get; set; }
 
         // Variable
@@ -69,7 +72,7 @@ namespace JavaCompiler
         public static int Size { get; set; }
 
         // Constant
-        public static ConstType TypeConst { get; set; }
+        public static VarType TypeConst { get; set; }
         public static int Value { get; set; }
         public static float ValueR { get; set; }
 
@@ -78,6 +81,7 @@ namespace JavaCompiler
         public static List<string> VarNames { get; set; } = new List<string>();
 
         // Method
+        public static List<string> ParameterNames { get; set; } = new List<string>();
         public static List<VarType> ParameterTypes { get; set; } = new List<VarType>();
         public static int ParameterVarsSize { get; set; }
         public static int ParameterNum { get; set; }
@@ -91,6 +95,7 @@ namespace JavaCompiler
             Offset = 0;
             LocalVarsSize = 0;
             ParameterTypes = new List<VarType>();
+            ParameterNames = new List<string>();
             ParameterVarsSize = 0;
             VarNames = new List<string>();
             ParameterNum = 0;

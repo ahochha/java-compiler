@@ -6,7 +6,6 @@ using static JavaCompiler.Resources;
 namespace JavaCompiler
 {
     public enum VarType { intType, booleanType, floatType, voidType }
-    public enum ConstType { intType, floatType }
     public enum PassingModes { passByValue, passByRef }
     public enum EntryType { tableEntry, varEntry, constEntry, methodEntry, classEntry }
 
@@ -75,6 +74,7 @@ namespace JavaCompiler
 
             varEntry.typeOfEntry = EntryType.varEntry;
             varEntry.offset = Offset;
+            varEntry.bpOffsetVarName = BpOffsetName;
             varEntry.varType = TypeVar;
             varEntry.size = Size;
 
@@ -120,7 +120,7 @@ namespace JavaCompiler
         {
             GetConstantValue();
 
-            if (TypeConst == ConstType.floatType)
+            if (TypeConst == VarType.floatType)
             {
                 ConvertConstantBasedOnType<float>(entry);
             }
@@ -164,7 +164,7 @@ namespace JavaCompiler
             constEntry.constType = TypeConst;
             constEntry.offset = Offset;
 
-            if (TypeConst == ConstType.floatType)
+            if (TypeConst == VarType.floatType)
             {
                 value = ValueR;
                 constEntry.value = value;

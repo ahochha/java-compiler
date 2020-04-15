@@ -51,7 +51,25 @@ namespace JavaCompiler
         public EntryType typeOfEntry { get; set; }
         public VarType varType { get; set; }
         public int offset { get; set; }
+        public string bpOffsetVarName { get; set; }
         public int size { get; set; }
+
+        public Variable()
+        {
+
+        }
+
+        public Variable(Variable var)
+        {
+            token = var.token;
+            lexeme = var.lexeme;
+            depth = var.depth;
+            typeOfEntry = var.typeOfEntry;
+            varType = var.varType;
+            offset = var.offset;
+            bpOffsetVarName = var.bpOffsetVarName;
+            size = var.size;
+        }
 
         public static implicit operator Variable(TableEntry entry)
         {
@@ -79,7 +97,7 @@ namespace JavaCompiler
         public string lexeme { get; set; }
         public int depth { get; set; }
         public EntryType typeOfEntry { get; set; }
-        public ConstType constType { get; set; }
+        public VarType constType { get; set; }
         public int offset { get; set; }
         public ValueT value { get; set; }
 
@@ -141,6 +159,7 @@ namespace JavaCompiler
         public EntryType typeOfEntry { get; set; }
         public int sizeOfLocalVars { get; set; }
         public List<VarType> parameterTypes { get; set; } = new List<VarType>();
+        public List<string> parameterNames { get; set; } = new List<string>();
         public int sizeOfParameterVars { get; set; }
         public int numOfParameters { get; set; }
         public VarType returnType { get; set; }

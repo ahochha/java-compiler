@@ -15,7 +15,7 @@ namespace JavaCompiler
         {
             try
             {
-                JavaFile.ReadLines($@"{Environment.CurrentDirectory}\\" + args[0]);
+                JavaFile.ReadLines(args[0]);
 
                 Parser parser = new Parser();
                 parser.Prog();
@@ -31,7 +31,7 @@ namespace JavaCompiler
 
                 JavaFile.CloseReader();
             }
-            catch
+            catch (Exception ex)
             {
                 Console.WriteLine("error - the compiler encountered an unknown error, please try compiling again");
                 Console.WriteLine("note - be sure you have the file being input into the program as an application argument");
