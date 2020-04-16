@@ -73,8 +73,8 @@ namespace JavaCompiler
 
         // Constant
         public static VarType TypeConst { get; set; }
-        public static int Value { get; set; }
-        public static float ValueR { get; set; }
+        public static int? Value { get; set; }
+        public static float? ValueR { get; set; }
 
         // Class
         public static List<string> MethodNames { get; set; } = new List<string>();

@@ -263,6 +263,8 @@ namespace JavaCompiler
         /// </summary>
         private void MethodDecl()
         {
+            ITableEntry Eplace = null;
+
             if (Token == Tokens.PublicT)
             {
                 Match(Tokens.PublicT);
@@ -284,7 +286,7 @@ namespace JavaCompiler
                 VarDecl();
                 SeqOfStatements();
                 Match(Tokens.ReturnT);
-                Expr();
+                Expr(ref Eplace);
                 Match(Tokens.SemiT);
                 symbolTable.ConvertEntryToMethod(entry);
                 symbolTable.DeleteDepth(Depth);
@@ -373,6 +375,8 @@ namespace JavaCompiler
         private void AssignStat()
         {
             ITableEntry firstIdEntry = symbolTable.Lookup(Lexeme);
+            ITableEntry Eplace = null;
+            string code = "";
 
             if (firstIdEntry != null && firstIdEntry.typeOfEntry == EntryType.classEntry)
             {
@@ -392,8 +396,8 @@ namespace JavaCompiler
                 }
                 else 
                 {
-                    Expr();
-                    tacTranslator.GenerateFinalExpressionTAC(firstIdEntry as Variable);
+                    Expr(ref Eplace);
+                    tacTranslator.GenerateFinalExpressionTAC(firstIdEntry, Eplace, ref code);
                 }
             }
             else
@@ -413,110 +417,99 @@ namespace JavaCompiler
         /// <summary>
         /// Expr -> Relation | ε
         /// </summary>
-        private void Expr()
+        private void Expr(ref ITableEntry Eplace)
         {
+            ITableEntry Tplace = null;
+
             if (FactorTokens.Contains(Token))
             {
-                Relation();
-                tacTranslator.Eplace = tacTranslator.Tplace;
+                Relation(ref Tplace);
+                Eplace = Tplace;
             }
         }
 
         /// <summary>
         /// Relation -> SimpleExpr
         /// </summary>
-        private void Relation()
+        private void Relation(ref ITableEntry Tplace)
         {
-            SimpleExpr();
+            SimpleExpr(ref Tplace);
         }
 
         /// <summary>
         /// SimpleExpr -> Term MoreTerm
         /// </summary>
-        private void SimpleExpr()
+        private void SimpleExpr(ref ITableEntry Tplace)
         {
-            Term();
-            tacTranslator.Rplace = tacTranslator.Tplace;
-            MoreTerm();
-
-            if (tacTranslator.tempVarStack.Count > 0)
-            {
-                tacTranslator.Tplace.bpOffsetVarName = tacTranslator.tempVarStack.Pop();
-            }
+            Term(ref Tplace);
+            MoreTerm(ref Tplace);
         }
 
         /// <summary>
         /// MoreTerm -> AddOpT Term MoreTerm | ε
         /// </summary>
-        private void MoreTerm()
+        private void MoreTerm(ref ITableEntry Rplace)
         {
+            string code = "";
+            string tempVarName = "";
+            ITableEntry Tplace = null;
+
             if (Token == Tokens.AddOpT)
             {
-                tacTranslator.hasSegments = true;
-                tacTranslator.NewTempVar();
-                tacTranslator.tempVarStack.Push(tacTranslator.tempVarName);
-                tacTranslator.GenerateSegmentOfExpressionTAC();
+                tacTranslator.NewTempVar(ref tempVarName, Rplace);
+                tacTranslator.GenerateSegmentOfExpressionTAC(ref code, tempVarName, Rplace);
                 AddOp();
-                tacTranslator.bpStack.Push(tacTranslator.code);
-                Term();
-                tacTranslator.code = tacTranslator.bpStack.Pop();
-                tacTranslator.code += tacTranslator.Tplace.bpOffsetVarName;
-                tacTranslator.Rplace.bpOffsetVarName = tacTranslator.tempVarName;
-                tacTranslator.GenerateLineOfTAC(tacTranslator.code);
-                MoreTerm();
+                Term(ref Tplace);
+                code += Tplace.bpOffsetName;
+                Rplace.bpOffsetName = tempVarName;
+                tacTranslator.GenerateLineOfTAC(ref code);
+                MoreTerm(ref Rplace);
             }
         }
 
         /// <summary>
         /// Term -> Factor MoreFactor
         /// </summary>
-        private void Term()
+        private void Term(ref ITableEntry Tplace)
         {
-            Factor();
-            tacTranslator.Rplace = tacTranslator.Tplace;
-            MoreFactor();
-
-            if (tacTranslator.tempVarStack.Count > 0)
-            {
-                tacTranslator.Tplace.bpOffsetVarName = tacTranslator.tempVarStack.Pop();
-            }
+            Factor(ref Tplace);
+            MoreFactor(ref Tplace);
         }
            
 
         /// <summary>
         /// MoreFactor -> MulOpT Factor MoreFactor | ε
         /// </summary>
-        private void MoreFactor()
+        private void MoreFactor(ref ITableEntry Rplace)
         {
+            string code = "";
+            string tempVarName = "";
+            ITableEntry Tplace = null;
+
             if (Token == Tokens.MulOpT)
             {
-                tacTranslator.hasSegments = true;
-                tacTranslator.NewTempVar();
-                tacTranslator.tempVarStack.Push(tacTranslator.tempVarName);
-                tacTranslator.GenerateSegmentOfExpressionTAC();
+                tacTranslator.NewTempVar(ref tempVarName, Rplace);
+                tacTranslator.GenerateSegmentOfExpressionTAC(ref code, tempVarName, Rplace);
                 MulOp();
-                tacTranslator.bpStack.Push(tacTranslator.code);
-                Factor();
-                tacTranslator.code = tacTranslator.bpStack.Pop();
-                tacTranslator.code += tacTranslator.Tplace.bpOffsetVarName;
-                tacTranslator.Rplace.bpOffsetVarName = tacTranslator.tempVarName;
-                tacTranslator.GenerateLineOfTAC(tacTranslator.code);
-                MoreFactor();
+                Factor(ref Tplace);
+                code += Tplace.bpOffsetName;
+                Rplace.bpOffsetName = tempVarName;
+                tacTranslator.GenerateLineOfTAC(ref code);
+                MoreFactor(ref Rplace);
             }
         }
 
         /// <summary>
         /// Factor - > IdT | NumT | (Expr) | ! Factor | SignOp Factor | TrueT | FalseT
         /// </summary>
-        private void Factor()
+        private void Factor(ref ITableEntry Tplace)
         {
             if (Token == Tokens.IdT)
             {
-                tacTranslator.Tplace = new Variable(symbolTable.Lookup(Lexeme) as Variable);
+                Tplace = new Variable(symbolTable.Lookup(Lexeme) as Variable);
 
-                if (tacTranslator.Tplace != null)
+                if (Tplace != null)
                 {
-                    //tacTranslator.Tplace.bpOffsetVarName = $"_bp-{tacTranslator.Tplace.offset}";
                     Match(Tokens.IdT);
                 }
                 else
@@ -526,29 +519,26 @@ namespace JavaCompiler
             }
             else if (Token == Tokens.NumT)
             {
-                tacTranslator.Tplace = new Variable();
-                tacTranslator.tempVarName = Lexeme;
-                tacTranslator.Tplace.lexeme = Lexeme;
+                Tplace = new Variable();
+                Tplace.bpOffsetName = Lexeme;
+                tacTranslator.GenerateTempExpressionTAC(ref Tplace);
                 Match(Tokens.NumT);
             }
             else if (Token == Tokens.LParenT)
             {
                 Match(Tokens.LParenT);
-                //tacTranslator.exprStack.Push(tacTranslator.tempVarStack);
-               // tacTranslator.tempVarStack = new Stack<string>();
-                Expr();
-                //tacTranslator.tempVarStack = tacTranslator.exprStack.Pop();
+                Expr(ref Tplace);
                 Match(Tokens.RParenT);
             }
             else if (Token == Tokens.NotOpT)
             {
                 Match(Tokens.NotOpT);
-                Factor();
+                Factor(ref Tplace);
             }
             else if (Token == Tokens.AddOpT && Lexeme == "-")
             {
                 SignOp();
-                Factor();
+                Factor(ref Tplace);
             }
             else if (Token == Tokens.TrueT)
             {
@@ -684,7 +674,7 @@ namespace JavaCompiler
             if (entry != null)
             {
                 Variable var = entry as Variable;
-                tacTranslator.GenerateLineOfTAC($"push {var.bpOffsetVarName}");
+                tacTranslator.GenerateLineOfTAC($"push {var.bpOffsetName}");
                 Match(Tokens.IdT);
                 ParamsTail();
             }

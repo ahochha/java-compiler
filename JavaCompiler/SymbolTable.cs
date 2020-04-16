@@ -74,7 +74,7 @@ namespace JavaCompiler
 
             varEntry.typeOfEntry = EntryType.varEntry;
             varEntry.offset = Offset;
-            varEntry.bpOffsetVarName = BpOffsetName;
+            varEntry.bpOffsetName = BpOffsetName;
             varEntry.varType = TypeVar;
             varEntry.size = Size;
 
@@ -141,10 +141,12 @@ namespace JavaCompiler
             if (int.TryParse(Lexeme, out value))
             {
                 Value = value;
+                ValueR = null;
             }
             else if (float.TryParse(Lexeme, out valueR))
             {
                 ValueR = valueR;
+                Value = null;
             }
             else
             {
@@ -163,6 +165,7 @@ namespace JavaCompiler
             constEntry.typeOfEntry = EntryType.constEntry;
             constEntry.constType = TypeConst;
             constEntry.offset = Offset;
+            constEntry.bpOffsetName = BpOffsetName;
 
             if (TypeConst == VarType.floatType)
             {

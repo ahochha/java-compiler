@@ -7,84 +7,75 @@ namespace JavaCompiler
 {
     public class TACTranslator
     {
-        public string code { get; set; }
-        public string tempVarName { get; set; }
         public int tempVarOffset { get; set; }
-        public bool hasSegments { get; set; }
-        public Variable Eplace { get; set; }
-        public Variable Tplace { get; set; }
-        public Variable Rplace { get; set; }
-        public Stack<string> bpStack { get; set; }
-        public Stack<string> tempVarStack { get; set; }
-        public Stack<Stack<string>> exprStack { get; set; }
+        public string directValue { get; set; }
 
         public TACTranslator()
         {
-            code = "";
-            tempVarName = "";
             tempVarOffset = 2;
-            bpStack = new Stack<string>();
-            tempVarStack = new Stack<string>();
-            exprStack = new Stack<Stack<string>>();
+        }
+
+        public void GenerateLineOfTAC(ref string line)
+        {
+            TACFile.AddLine(line);
+            line = "";
         }
 
         public void GenerateLineOfTAC(string line)
         {
             TACFile.AddLine(line);
-            code = "";
         }
 
-        //public void GenerateTempSegmentOfExpressionTAC()
-        //{
-        //    NewTempVar();
-        //    code = $"{tempVarName} = {Eplace.lexeme}";
-        //    GenerateLineOfTAC(code);
-        //}
-
-        public void GenerateSegmentOfExpressionTAC()
+        public void GenerateTempExpressionTAC(ref ITableEntry Tplace)
         {
-            code = $"{tempVarName} = {Rplace.bpOffsetVarName} {Lexeme} ";
+            string tempVarName = "";
+            NewTempVar(ref tempVarName, Tplace);
+            GenerateLineOfTAC($"{tempVarName} = {Tplace.bpOffsetName}");
+            Tplace.bpOffsetName = tempVarName;
         }
 
-        public void GenerateFinalExpressionTAC(Variable var)
+        public void GenerateSegmentOfExpressionTAC(ref string code, string tempVarName, ITableEntry Rplace)
         {
-            if (hasSegments == true)
-            {
-                tempVarName = TACFile.GetFinalVarName();
-            }
-
-            code = $"{var.bpOffsetVarName} = {tempVarName}";
-            GenerateLineOfTAC(code);
-            hasSegments = false;
+            code = $"{tempVarName} = {Rplace.bpOffsetName} {Lexeme} ";
         }
 
-        public void NewTempVar()
+        public void GenerateFinalExpressionTAC(ITableEntry IdEntry, ITableEntry Eplace, ref string code)
         {
+            code = $"{IdEntry.bpOffsetName} = {Eplace.bpOffsetName}";
+            GenerateLineOfTAC(ref code);
+        }
+
+        public void NewTempVar(ref string tempVarName, ITableEntry entry)
+        {
+            Variable var = entry as Variable;
             tempVarName = $"_bp-{LocalVarsSize + tempVarOffset}";
 
-            if (Tplace.size != 0)
+            if (var != null && var.size != 0)
             {
-                tempVarOffset += Tplace.size;
+                tempVarOffset += var.size;
             }
             else
             {
-                GetDirectValue();
+                GetDirectValue(var);
             }
         }
 
-        public void GetDirectValue()
+        public void GetDirectValue(Variable var)
         {
             int number = 0;
 
-            if (int.TryParse(Tplace.lexeme, out number) && Tplace.lexeme.Contains("."))
+            if (int.TryParse(var.bpOffsetName, out number) && var.bpOffsetName.Contains("."))
             {
+                var.size = 4;
                 tempVarOffset += 4;
             }
-            else if (int.TryParse(Tplace.lexeme, out number))
+            else if (int.TryParse(var.bpOffsetName, out number))
             {
+                var.size = 2;
                 tempVarOffset += 2;
             }
-            else if (Tplace.lexeme == "true" || Tplace.lexeme == "false") {
+            else if (var.bpOffsetName == "true" || var.bpOffsetName == "false") {
+                var.size = 1;
                 tempVarOffset += 1;
             }
             else
