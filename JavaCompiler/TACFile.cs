@@ -8,13 +8,18 @@ namespace JavaCompiler
     public static class TACFile
     {
         private static List<string> lines { get; set; } = new List<string>();
-        private static StreamWriter streamWriter { get; set; }
 
+        /// <summary>
+        /// Adds the built code to the list of lines
+        /// </summary>
         public static void AddLine(string line)
         {
             lines.Add(line);
         }
 
+        /// <summary>
+        /// Creates the TAC file once every line in the file has been read.
+        /// </summary>
         public static void CreateTACFile()
         {
             string tacFileName = JavaFile.fileName.Split(".")[0] + ".TAC";
@@ -23,14 +28,10 @@ namespace JavaCompiler
             {
                 foreach(string line in lines)
                 {
+                    Console.WriteLine(line);
                     sw.WriteLine(line);
                 }
             }
-        }
-
-        public static string GetFinalVarName()
-        {
-            return lines[lines.Count - 1].Split("=")[0].Trim();
         }
     }
 }

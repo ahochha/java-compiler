@@ -96,7 +96,7 @@ namespace JavaCompiler
     /// <summary>
     /// Implements ITableEntry and IValue. Also contains constant specific fields.
     /// </summary>
-    public class Constant<ValueT> : ITableEntry, IValue<ValueT>
+    public class Constant : ITableEntry
     {
         public Tokens token { get; set; }
         public string lexeme { get; set; }
@@ -105,14 +105,14 @@ namespace JavaCompiler
         public string bpOffsetName { get; set; }
         public VarType constType { get; set; }
         public int offset { get; set; }
-        public ValueT value { get; set; }
+        public dynamic value { get; set; }
 
         public Constant()
         {
             
         }
 
-        public Constant(Constant<ValueT> entry)
+        public Constant(Constant entry)
         {
             token = entry.token;
             lexeme = entry.lexeme;
@@ -124,16 +124,16 @@ namespace JavaCompiler
             value = entry.value;
         }
 
-        public static implicit operator Constant<ValueT>(TableEntry entry)
+        public static implicit operator Constant(TableEntry entry)
         {
-            return (entry != null) ? new Constant<ValueT>()
+            return (entry != null) ? new Constant()
             {
                 lexeme = entry.lexeme,
                 token = entry.token,
                 depth = entry.depth,
                 bpOffsetName = entry.bpOffsetName
             }
-            : new Constant<ValueT>()
+            : new Constant()
             {
                 lexeme = "",
                 token = Tokens.UnknownT,

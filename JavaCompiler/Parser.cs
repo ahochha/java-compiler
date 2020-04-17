@@ -83,6 +83,7 @@ namespace JavaCompiler
             TypeReturn = VarType.voidType;
             TableEntry mainEntry = symbolTable.CreateTableEntry();
             MethodNames.Add(Lexeme);
+            tacTranslator.GenerateLineOfTAC("Proc main");
             Match(Tokens.MainT);
             Depth++;
             ResetMethodGlobals();
@@ -94,6 +95,7 @@ namespace JavaCompiler
             Match(Tokens.RParenT);
             Match(Tokens.LBraceT);
             SeqOfStatements();
+            tacTranslator.GenerateLineOfTAC("Endp main");
             symbolTable.ConvertEntryToMethod(mainEntry);
             symbolTable.DeleteDepth(Depth);
             Depth--;
@@ -287,10 +289,17 @@ namespace JavaCompiler
                 SeqOfStatements();
                 Match(Tokens.ReturnT);
                 Expr(ref Eplace);
+
+                if (Eplace != null && Eplace.bpOffsetName != "")
+                {
+                    tacTranslator.GenerateLineOfTAC($"_ax = {Eplace.bpOffsetName}");
+                }
+
                 Match(Tokens.SemiT);
                 symbolTable.ConvertEntryToMethod(entry);
                 symbolTable.DeleteDepth(Depth);
                 tacTranslator.GenerateLineOfTAC($"Endp {entry.lexeme}");
+                tacTranslator.GenerateLineOfTAC("");
                 Depth--;
                 Match(Tokens.RBraceT);
                 MethodDecl();
@@ -392,7 +401,7 @@ namespace JavaCompiler
                 if (secondIdEntry != null && secondIdEntry.typeOfEntry == EntryType.classEntry)
                 {
                     MethodCall(secondIdEntry as Class);
-                    tacTranslator.GenerateLineOfTAC($"{firstIdEntry.lexeme} = _ax");
+                    tacTranslator.GenerateLineOfTAC($"{firstIdEntry.bpOffsetName} = _ax");
                 }
                 else 
                 {
@@ -456,10 +465,12 @@ namespace JavaCompiler
 
             if (Token == Tokens.AddOpT)
             {
+                //generates a new var then creates the first part of the line
                 tacTranslator.NewTempVar(ref tempVarName, Rplace);
                 tacTranslator.GenerateSegmentOfExpressionTAC(ref code, tempVarName, Rplace);
                 AddOp();
                 Term(ref Tplace);
+                //finishes the line after the recursive call, using the info gathered from recursion
                 code += Tplace.bpOffsetName;
                 Rplace.bpOffsetName = tempVarName;
                 tacTranslator.GenerateLineOfTAC(ref code);
@@ -488,10 +499,12 @@ namespace JavaCompiler
 
             if (Token == Tokens.MulOpT)
             {
+                //generates a new var then creates the first part of the line
                 tacTranslator.NewTempVar(ref tempVarName, Rplace);
                 tacTranslator.GenerateSegmentOfExpressionTAC(ref code, tempVarName, Rplace);
                 MulOp();
                 Factor(ref Tplace);
+                //finishes the line after the recursive call, using the info gathered from recursion
                 code += Tplace.bpOffsetName;
                 Rplace.bpOffsetName = tempVarName;
                 tacTranslator.GenerateLineOfTAC(ref code);
@@ -506,7 +519,18 @@ namespace JavaCompiler
         {
             if (Token == Tokens.IdT)
             {
-                Tplace = new Variable(symbolTable.Lookup(Lexeme) as Variable);
+                ITableEntry entry = symbolTable.Lookup(Lexeme);
+
+                if (entry.typeOfEntry == EntryType.varEntry)
+                {
+                    Tplace = new Variable(entry as Variable);
+                }
+                else
+                {
+                    Tplace = new Constant(entry as Constant);
+                    Constant constVar = Tplace as Constant;
+                    Tplace.bpOffsetName = constVar.value.ToString();
+                }
 
                 if (Tplace != null)
                 {
@@ -519,8 +543,7 @@ namespace JavaCompiler
             }
             else if (Token == Tokens.NumT)
             {
-                Tplace = new Variable();
-                Tplace.bpOffsetName = Lexeme;
+                Tplace = new Variable() { bpOffsetName = Lexeme, typeOfEntry = EntryType.varEntry };
                 tacTranslator.GenerateTempExpressionTAC(ref Tplace);
                 Match(Tokens.NumT);
             }
@@ -534,18 +557,36 @@ namespace JavaCompiler
             {
                 Match(Tokens.NotOpT);
                 Factor(ref Tplace);
+
+                Tplace.bpOffsetName = $"!{Tplace.bpOffsetName}";
             }
             else if (Token == Tokens.AddOpT && Lexeme == "-")
             {
+                string code = "";
+                string tempVarName = "";
+
+                // negates the value returned from the recursion
+                // Ex. _bp-2 = 0 - _bp-4
+                // can only handle integers right now
+                Tplace = new Variable() { size = 2, typeOfEntry = EntryType.varEntry, bpOffsetName = "0" };
+                tacTranslator.NewTempVar(ref tempVarName, Tplace);
+                tacTranslator.GenerateSegmentOfExpressionTAC(ref code, tempVarName, Tplace);
                 SignOp();
                 Factor(ref Tplace);
+                code += Tplace.bpOffsetName;
+                Tplace.bpOffsetName = tempVarName;
+                tacTranslator.GenerateLineOfTAC(ref code);
             }
             else if (Token == Tokens.TrueT)
             {
+                Tplace = new Variable() { bpOffsetName = Lexeme, typeOfEntry = EntryType.varEntry };
+                tacTranslator.GenerateTempExpressionTAC(ref Tplace);
                 Match(Tokens.TrueT);
             }
             else if (Token == Tokens.FalseT)
             {
+                Tplace = new Variable() { bpOffsetName = Lexeme, typeOfEntry = EntryType.varEntry };
+                tacTranslator.GenerateTempExpressionTAC(ref Tplace);
                 Match(Tokens.FalseT);
             }
             else
@@ -588,20 +629,12 @@ namespace JavaCompiler
 
             if (classEntry.methodNames.Contains(Lexeme) || MethodNames.Contains(Lexeme))
             {
-                ITableEntry entry = symbolTable.Lookup(Lexeme);
-
-                if (entry != null)
-                {
-                    Match(Tokens.IdT);
-                    Match(Tokens.LParenT);
-                    Params();
-                    Match(Tokens.RParenT);
-                    tacTranslator.GenerateLineOfTAC($"Call {entry.lexeme}");
-                }
-                else
-                {
-                    ErrorHandler.LogError($"\"{Lexeme}\" is undeclared");
-                }
+                string methodName = Lexeme;
+                Match(Tokens.IdT);
+                Match(Tokens.LParenT);
+                Params();
+                Match(Tokens.RParenT);
+                tacTranslator.GenerateLineOfTAC($"Call {methodName}");
             }
             else
             {
@@ -626,15 +659,28 @@ namespace JavaCompiler
             {
                 ParamsHelper();
             }
-            else if (Token == Tokens.NumT)
+            else if (Token == Tokens.NumT || Token == Tokens.TrueT || Token == Tokens.FalseT)
             {
                 tacTranslator.GenerateLineOfTAC($"push {Lexeme}");
-                Match(Tokens.NumT);
+
+                if (Token == Tokens.NumT)
+                {
+                    Match(Tokens.NumT);
+                }
+                else if (Token == Tokens.TrueT)
+                {
+                    Match(Tokens.TrueT);
+                }
+                else
+                {
+                    Match(Tokens.FalseT);
+                }
+
                 ParamsTail();
             }
             else if (Token != Tokens.RParenT)
             {
-                ErrorHandler.LogError($"parameters to method calls must be variables or numbers");
+                ErrorHandler.LogError($"parameters to method calls must be variables, numbers, true, or false");
             }
         }
 
@@ -651,15 +697,28 @@ namespace JavaCompiler
                 {
                     ParamsHelper();
                 }
-                else if (Token == Tokens.NumT)
+                else if (Token == Tokens.NumT || Token == Tokens.TrueT || Token == Tokens.FalseT)
                 {
                     tacTranslator.GenerateLineOfTAC($"push {Lexeme}");
-                    Match(Tokens.NumT);
+
+                    if (Token == Tokens.NumT)
+                    {
+                        Match(Tokens.NumT);
+                    }
+                    else if (Token == Tokens.TrueT)
+                    {
+                        Match(Tokens.TrueT);
+                    }
+                    else
+                    {
+                        Match(Tokens.FalseT);
+                    }
+
                     ParamsTail();
                 }
                 else
                 {
-                    ErrorHandler.LogError($"parameters to method calls must be variables or numbers");
+                    ErrorHandler.LogError($"parameters to method calls must be variables, numbers, true, or false");
                 }
             }
         }

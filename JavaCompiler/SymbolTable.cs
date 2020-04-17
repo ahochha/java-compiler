@@ -118,16 +118,28 @@ namespace JavaCompiler
         /// </summary>
         public void ConvertEntryToConstant(ITableEntry entry)
         {
+            Constant constEntry = entry as TableEntry;
+            dynamic value;
+
+            constEntry.typeOfEntry = EntryType.constEntry;
+            constEntry.constType = TypeConst;
+            constEntry.offset = Offset;
+            constEntry.bpOffsetName = BpOffsetName;
+
             GetConstantValue();
 
             if (TypeConst == VarType.floatType)
             {
-                ConvertConstantBasedOnType<float>(entry);
+                value = ValueR;
+                constEntry.value = value;
             }
             else
             {
-                ConvertConstantBasedOnType<int>(entry);
+                value = Value;
+                constEntry.value = value;
             }
+
+            Upsert(constEntry);
         }
 
         /// <summary>
@@ -152,33 +164,6 @@ namespace JavaCompiler
             {
                 ErrorHandler.LogError($"{Lexeme} is not a number.");
             }
-        }
-
-        /// <summary>
-        /// Converts the entry to a constant of type int or float.
-        /// </summary>
-        public void ConvertConstantBasedOnType<ValueT>(ITableEntry entry)
-        {
-            Constant<ValueT> constEntry = entry as TableEntry;
-            dynamic value;
-
-            constEntry.typeOfEntry = EntryType.constEntry;
-            constEntry.constType = TypeConst;
-            constEntry.offset = Offset;
-            constEntry.bpOffsetName = BpOffsetName;
-
-            if (TypeConst == VarType.floatType)
-            {
-                value = ValueR;
-                constEntry.value = value;
-            }
-            else
-            {
-                value = Value;
-                constEntry.value = value;
-            }
-
-            Upsert(constEntry);
         }
 
         /// <summary>
