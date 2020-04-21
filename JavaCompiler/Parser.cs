@@ -387,7 +387,7 @@ namespace JavaCompiler
             ITableEntry Eplace = null;
             string code = "";
 
-            if (firstIdEntry != null && firstIdEntry.typeOfEntry == EntryType.classEntry)
+            if (firstIdEntry != null && (firstIdEntry.typeOfEntry == EntryType.classEntry || firstIdEntry.typeOfEntry == EntryType.tableEntry))
             {
                 MethodCall(firstIdEntry as Class);
             }
@@ -627,7 +627,7 @@ namespace JavaCompiler
             ClassName();
             Match(Tokens.PeriodT);
 
-            if (classEntry.methodNames.Contains(Lexeme) || MethodNames.Contains(Lexeme))
+            if ((classEntry != null && classEntry.methodNames.Contains(Lexeme)) || MethodNames.Contains(Lexeme))
             {
                 string methodName = Lexeme;
                 Match(Tokens.IdT);
