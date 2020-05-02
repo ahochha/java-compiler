@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using static JavaCompiler.Resources;
 
 namespace JavaCompiler
 {
     public static class TACFile
     {
+        public static string tacFileName { get; set; }
+        public static string tacWord { get; set; }
+        private static StreamReader program { get; set; }
         private static List<string> lines { get; set; } = new List<string>();
 
         /// <summary>
@@ -22,7 +26,7 @@ namespace JavaCompiler
         /// </summary>
         public static void CreateTACFile()
         {
-            string tacFileName = JavaFile.fileName.Split(".")[0] + ".TAC";
+            tacFileName = JavaFile.fileName.Split(".")[0] + ".TAC";
 
             using (StreamWriter sw = new StreamWriter(tacFileName))
             {
@@ -32,6 +36,41 @@ namespace JavaCompiler
                     sw.WriteLine(line);
                 }
             }
+        }
+
+        public static void ReadLinesFromFile()
+        {
+            string filePath = $@"{Environment.CurrentDirectory}\\" + tacFileName;
+
+            program = File.OpenText(filePath);
+        }
+
+        public static string GetNextWord()
+        {
+            tacWord = "";
+
+            while (char.IsWhiteSpace(CurrentChar))
+            {
+                CurrentChar = (char)program.Read();
+            }
+
+            while (!char.IsWhiteSpace(CurrentChar))
+            {
+                tacWord += CurrentChar;
+                CurrentChar = (char)program.Read();
+            }
+
+            return tacWord;
+        }
+
+        public static char PeekNextChar()
+        {
+            while (char.IsWhiteSpace((char)program.Peek()))
+            {
+                CurrentChar = (char)program.Read();
+            }
+
+            return (char)program.Peek();
         }
     }
 }

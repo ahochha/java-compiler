@@ -11,7 +11,6 @@ namespace JavaCompiler
             Token = Tokens.UnknownT;
             CurrentChar = '\0';
             Lexeme = "";
-            Literal = "";
         }
 
         /// <summary>
@@ -155,8 +154,7 @@ namespace JavaCompiler
         /// </example>
         public void ProcessLiteral()
         {
-            Token = Tokens.QuoteT;
-            JavaFile.GetNextChar();
+            Token = Tokens.LiteralT;
             Lexeme = CurrentChar.ToString();
 
             while (JavaFile.PeekNextChar() != '\"' && JavaFile.PeekNextChar() != '\n' && !JavaFile.EndOfFile())
@@ -165,13 +163,10 @@ namespace JavaCompiler
                 Lexeme += CurrentChar;
             }
 
-            Token = Tokens.LiteralT;
-
             if (JavaFile.PeekNextChar() == '\"')
             {
-                Token = Tokens.QuoteT;
                 JavaFile.GetNextChar();
-                Lexeme = CurrentChar.ToString();
+                Lexeme += CurrentChar.ToString();
             }
         }
 

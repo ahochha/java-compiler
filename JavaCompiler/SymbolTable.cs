@@ -110,6 +110,7 @@ namespace JavaCompiler
             methodEntry.sizeOfParameterVars = ParameterVarsSize;
             methodEntry.parameterTypes = ParameterTypes;
 
+            ASMProcs.Enqueue(methodEntry); // saves the method for asm proc generation later
             Upsert(methodEntry);
         }
 

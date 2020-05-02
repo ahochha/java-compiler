@@ -5,13 +5,14 @@ namespace JavaCompiler
 {
     public static class Resources
     {
+        #region Lexical Analyzer
         // Java reserved words
         public static List<string> KeyWords = new List<string>()
         {
             "final", "class", "public", "static", "void", "main",
             "String", "extends", "return", "int", "boolean", "float",
             "if", "else", "while", "System.out.println", "length",
-            "true", "false", "this", "new"
+            "true", "false", "this", "new", "write", "writeln", "read"
         };
 
         // Types of Tokens
@@ -20,27 +21,15 @@ namespace JavaCompiler
             FinalT, ClassT, PublicT, StaticT, VoidT, MainT,
             StringT, ExtendsT, ReturnT, IntT, BooleanT, FloatT, IfT,
             ElseT, WhileT, PrintT, LengthT, TrueT, FalseT, ThisT,
-            NewT, LParenT, RParenT, LBrackT, RBrackT, LBraceT, RBraceT,
-            CommaT, SemiT, PeriodT, IdT, NumT, LiteralT, QuoteT,
-            AssignOpT, NotOpT, AddOpT, MulOpT, RelOpT, EofT, UnknownT
+            NewT, WriteT, WritelnT, ReadT, LParenT, RParenT, LBrackT, RBrackT, 
+            LBraceT, RBraceT, CommaT, SemiT, PeriodT, IdT, NumT, LiteralT, 
+            QuoteT, AssignOpT, NotOpT, AddOpT, MulOpT, RelOpT, EofT, UnknownT
         }
 
         // Data types supported
         public static List<Tokens> Types = new List<Tokens>
         {
             Tokens.IntT, Tokens.FloatT, Tokens.BooleanT, Tokens.VoidT
-        };
-
-        // Tokens that are operators
-        public static List<Tokens> OperatorTokens = new List<Tokens>()
-        {
-            Tokens.AssignOpT, Tokens.NotOpT, Tokens.RelOpT, Tokens.AddOpT, Tokens.MulOpT
-        };
-
-        public static List<Tokens> FactorTokens = new List<Tokens>()
-        {
-            Tokens.IdT, Tokens.NumT, Tokens.LParenT, Tokens.NotOpT, Tokens.AddOpT, 
-            Tokens.TrueT, Tokens.FalseT
         };
 
         // Regular expressions used in LexicalAnalyzer
@@ -54,13 +43,26 @@ namespace JavaCompiler
         public static Regex numberRegex = new Regex(@"^(\d+\.)?\d+$");
         public static Regex oneLineCommentEndRegex = new Regex(@"\n[^\r|\n]");
         public static Regex multiLineCommentEndRegex = new Regex(@"\*/");
+        #endregion
 
-        // Parser Global Variables
+        #region Parser
+
+        // Tokens that are operators
+        public static List<Tokens> OperatorTokens = new List<Tokens>()
+        {
+            Tokens.AssignOpT, Tokens.NotOpT, Tokens.RelOpT, Tokens.AddOpT, Tokens.MulOpT
+        };
+
+        // Tokens that are factors
+        public static List<Tokens> FactorTokens = new List<Tokens>()
+        {
+            Tokens.IdT, Tokens.NumT, Tokens.LParenT, Tokens.NotOpT, Tokens.AddOpT,
+            Tokens.TrueT, Tokens.FalseT
+        };
 
         // General
         public static Tokens Token { get; set; }
         public static string Lexeme { get; set; }
-        public static string Literal { get; set; }
         public static char CurrentChar { get; set; }
         public static int Depth { get; set; }
         public static int Offset { get; set; }
@@ -111,5 +113,16 @@ namespace JavaCompiler
             MethodNames = new List<string>();
             VarNames = new List<string>();
         }
+
+        #endregion
+
+        #region ASM file Generation
+        public static List<string> TACKeywords = new List<string>()
+        {
+            "proc", "endp", "wrs", "wri", "wrln", "rdi", "call", "push"
+        };
+
+        public static Queue<Method> ASMProcs = new Queue<Method>();
+        #endregion
     }
 }

@@ -1,12 +1,6 @@
 ﻿using System;
 using static JavaCompiler.Resources;
 
-//Name: AUSTIN HOCHHALTER
-//Class: CSC 446
-//Assignment: 4
-//Due Date: 3/6/2020
-//Professor: HAMER
-
 namespace JavaCompiler
 {
     class Program
@@ -18,11 +12,16 @@ namespace JavaCompiler
                 JavaFile.ReadLines(args[0]);
 
                 Parser parser = new Parser();
+                Console.WriteLine("TAC File:");
+                Console.WriteLine("---------");
                 parser.Prog();
 
                 if (Token == Tokens.EofT)
                 {
+                    Console.WriteLine("");
                     Console.WriteLine("successful compilation!");
+                    Console.WriteLine("");
+                    Console.WriteLine("");
                 }
                 else
                 {
@@ -37,6 +36,12 @@ namespace JavaCompiler
                 Console.WriteLine("note - be sure you have the file being input into the program as an application argument");
                 Environment.Exit(100);
             }
+
+            Console.WriteLine("Assembly File:");
+            Console.WriteLine("--------------");
+            AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
+            TACFile.ReadLinesFromFile();
+            assemblyGenerator.GenerateASMFile();
         }
     }
 }

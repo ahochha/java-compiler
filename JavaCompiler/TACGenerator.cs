@@ -5,11 +5,11 @@ using static JavaCompiler.Resources;
 
 namespace JavaCompiler
 {
-    public class TACTranslator
+    public class TACGenerator
     {
         public int tempVarOffset { get; set; }
 
-        public TACTranslator()
+        public TACGenerator()
         {
             tempVarOffset = 2;
         }
