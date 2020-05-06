@@ -9,6 +9,7 @@ namespace JavaCompiler
     {
         public void GenerateASMFile()
         {
+            CurrentChar = ' ';
             GenerateProgBeginningASM();
             GenerateStartProcASM();
             GenerateProcsASM();
@@ -167,6 +168,7 @@ namespace JavaCompiler
             else if (opChar == '/')
             {
                 AssemblyFile.AddLine($"     mov ax, {axReg}");
+                AssemblyFile.AddLine($"     cwd");
                 AssemblyFile.AddLine($"     mov bx, {GetAndFormatWord()}");
                 AssemblyFile.AddLine($"     idiv bx");
                 AssemblyFile.AddLine($"     mov {tacWord}, ax");
@@ -195,7 +197,7 @@ namespace JavaCompiler
                 AssemblyFile.AddLine($"     mov ax, {axReg}");
                 AssemblyFile.AddLine($"     mov {tacWord}, ax");
 
-                if (!axReg.Contains("bp"))
+                if (!axReg.Contains("bp") && !int.TryParse(axReg, out int result))
                 {
                     tacWord = GetAndFormatWord();
                     TACFile.GetNextWord(); // skip equal sign

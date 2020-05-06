@@ -732,9 +732,9 @@ namespace JavaCompiler
             if (entry != null)
             {
                 Variable var = entry as Variable;
-                tacGenerator.GenerateLineOfTAC($"push {var.bpOffsetName}");
                 Match(Tokens.IdT);
                 ParamsTail();
+                tacGenerator.GenerateLineOfTAC($"push {var.bpOffsetName}");
             }
             else
             {
