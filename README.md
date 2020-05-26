@@ -36,4 +36,5 @@ The Assembly file generated from the compiler can be assembled, linked, and load
 * Assembly
 ### Technologies Used:
 * [Visual Studio](https://visualstudio.microsoft.com/vs/community/) - Popular IDE used to develop desktop, mobile, and web applications
+* [Git](https://git-scm.com/) - Open source distributed version control system
 * [DOSBox](https://www.dosbox.com/) - DOS emulator used to run Assembly programs
