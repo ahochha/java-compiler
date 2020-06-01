@@ -2,6 +2,9 @@
 
 This compiler implements common grammar used in the Java programming language such as classes, functions, simple expressions, and I/O. During development, I focused on architecting and writing clean code using techniques I learned from *Clean Code: A Handbook of Agile Software Craftsmanship* by Robert C. Martin. I read the first few chapters while working my first industry job at Daktronics and figured the techniques would fit well in this project. The compiler is the final result of multiple assignments given in SDSU's Compiler Construction course.
 
+### Video Demo
+Learn more about this project by clicking [here](https://drive.google.com/file/d/16JIwaOWH0oI-ikMyJCmJkvWOO_UvYasC/view?usp=sharing)!
+
 ## How It Works
 
 Although the compiler doesn't fully implement every feature provided in existing Java compilers, it is still a fully functioning compiler!
